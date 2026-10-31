@@ -2,131 +2,391 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>~*~ Sham's Homepage ~*~</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sham's Computer</title>
 <style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; overflow: hidden; }
   body {
-    background-color: #000033;
-    background-image:
-      radial-gradient(#ffffff 1px, transparent 1px),
-      radial-gradient(#ffff66 1px, transparent 1px);
-    background-size: 40px 40px, 70px 70px;
-    background-position: 0 0, 20px 30px;
-    color: #00ff00;
-    font-family: "Comic Sans MS", "Comic Sans", cursive;
-    text-align: center;
-    cursor: crosshair;
+    background: #008080;
+    font: 12px Tahoma, "MS Sans Serif", Verdana, sans-serif;
+    color: #000;
+    user-select: none;
   }
-  a { color: #ffff00; }
-  a:visited { color: #ff66ff; }
-  a:hover { color: #ff0000; background: #ffff00; }
+  button { font: inherit; color: inherit; cursor: default; }
+  a { color: #0000ee; }
 
-  h1 {
-    font-size: 48px;
-    background: linear-gradient(90deg, red, orange, yellow, lime, cyan, blue, violet);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    text-shadow: none;
+  /* ---------- bevels ---------- */
+  .raised {
+    background: #c0c0c0;
+    border: 2px solid; border-color: #fff #404040 #404040 #fff;
+    box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
   }
-  .blink { animation: blink 1s steps(2, start) infinite; }
-  @keyframes blink { to { visibility: hidden; } }
+  .sunken {
+    border: 2px solid; border-color: #808080 #fff #fff #808080;
+    box-shadow: inset 1px 1px #404040;
+  }
+  .btn {
+    background: #c0c0c0; padding: 4px 16px;
+    border: 2px solid; border-color: #fff #404040 #404040 #fff;
+    box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
+  }
+  .btn:active {
+    border-color: #404040 #fff #fff #404040;
+    box-shadow: inset 1px 1px #808080;
+  }
+  .paper { background: #fff; padding: 10px; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px #404040; }
 
-  .box {
-    width: 600px; max-width: 90%;
-    margin: 20px auto; padding: 12px;
-    border: 4px ridge #c0c0c0;
-    background: #000066;
+  /* ---------- desktop + icons ---------- */
+  #desktop {
+    position: absolute; inset: 0 0 30px 0; padding: 8px;
+    display: flex; flex-direction: column; flex-wrap: wrap;
+    align-content: flex-start; gap: 12px;
   }
-  .marquee-wrap { background: #ff00ff; color: #ffff00; font-weight: bold; padding: 4px; }
-  table.nav { margin: 0 auto; border-collapse: collapse; }
-  table.nav td { border: 2px outset #c0c0c0; padding: 6px 14px; background: #333399; }
-  .counter {
-    display: inline-block; background: #000; color: #ff0000;
-    font-family: "Courier New", monospace; letter-spacing: 4px;
-    padding: 4px 8px; border: 2px inset #888;
+  .icon {
+    width: 76px; padding: 2px; background: none;
+    border: 1px dotted transparent;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    color: #fff; text-align: center;
   }
-  .badge {
-    display: inline-block; width: 88px; height: 31px; line-height: 31px;
-    border: 1px solid #fff; background: #444; color: #fff;
-    font: 10px Verdana, sans-serif; margin: 2px;
+  .glyph { font-size: 34px; line-height: 1; filter: drop-shadow(1px 1px 0 #000); }
+  .label { padding: 1px 3px; text-shadow: 1px 1px #000; }
+  .icon.sel .label { background: #000080; outline: 1px dotted #ff0; text-shadow: none; }
+
+  /* ---------- windows ---------- */
+  .window {
+    display: none; position: absolute; flex-direction: column;
+    max-width: 100vw; max-height: calc(100% - 34px);
+    background: #c0c0c0; padding: 2px;
+    border: 2px solid; border-color: #dfdfdf #000 #000 #dfdfdf;
+    box-shadow: inset -1px -1px #808080, inset 1px 1px #fff, 2px 2px 0 rgba(0,0,0,.35);
   }
-  .sparkle {
-    position: fixed; pointer-events: none; font-size: 14px;
-    animation: fall 0.9s linear forwards;
+  .window.show { display: flex; }
+  .window.maxed { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 30px) !important; max-height: none; }
+  .titlebar {
+    flex: none; height: 20px; padding: 2px 3px;
+    display: flex; align-items: center; gap: 4px;
+    background: linear-gradient(90deg, #808080, #b5b5b5);
+    color: #fff; font-weight: bold; touch-action: none;
   }
-  @keyframes fall { to { transform: translateY(40px) rotate(180deg); opacity: 0; } }
+  .window.active .titlebar { background: linear-gradient(90deg, #000080, #1084d0); }
+  .ttext { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbtns { display: flex; gap: 2px; }
+  .tbtns button {
+    width: 16px; height: 14px; padding: 0; line-height: 1;
+    font: bold 9px Tahoma, sans-serif; color: #000; background: #c0c0c0;
+    border: 1px solid; border-color: #fff #404040 #404040 #fff;
+    box-shadow: inset -1px -1px #808080;
+  }
+  .tbtns button:active { border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080; }
+  .content { flex: 1; min-height: 0; overflow: auto; padding: 10px; user-select: text; }
+  .content h1 { font-size: 20px; margin: 0 0 8px; }
+  .content h2 { font-size: 14px; margin: 0 0 6px; }
+  .content p { margin: 0 0 8px; line-height: 1.4; }
+  .content ul { margin: 0; padding-left: 20px; line-height: 1.8; }
+  .row { display: flex; gap: 12px; align-items: flex-start; }
+  .big { font-size: 40px; line-height: 1; }
+  label { display: block; margin: 6px 0 2px; }
+  input[type=text], textarea {
+    width: 100%; font: inherit; padding: 3px; background: #fff;
+    border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px #404040;
+  }
+  textarea { height: 110px; resize: none; }
+
+  /* ---------- taskbar ---------- */
+  #taskbar {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 30px; z-index: 100000;
+    display: flex; align-items: center; gap: 4px; padding: 2px;
+    background: #c0c0c0; border-top: 2px solid #fff; box-shadow: inset 0 1px #dfdfdf;
+  }
+  #start-btn { height: 24px; padding: 0 8px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+  #start-btn.down { border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080; }
+  #tasks { flex: 1; display: flex; gap: 2px; min-width: 0; }
+  .task {
+    flex: 0 1 160px; min-width: 0; height: 24px; padding: 0 6px; text-align: left;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff;
+    box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
+  }
+  .task.pressed {
+    font-weight: bold; border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080;
+    background: repeating-conic-gradient(#c0c0c0 0 25%, #fff 0 50%) 0 0 / 2px 2px;
+  }
+  #tray {
+    height: 24px; padding: 0 10px; display: flex; align-items: center; gap: 6px;
+    border: 2px solid; border-color: #808080 #fff #fff #808080;
+  }
+
+  /* ---------- start menu ---------- */
+  #start-menu {
+    display: none; position: fixed; left: 2px; bottom: 30px; width: 210px; z-index: 100001; padding: 2px;
+  }
+  #start-menu.show { display: flex; }
+  .banner {
+    width: 26px; padding: 8px 3px; color: #fff; font: bold 20px Arial, sans-serif;
+    background: linear-gradient(0deg, #1084d0, #000080);
+    writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
+  }
+  .banner span { font-weight: normal; }
+  #start-menu ul { list-style: none; margin: 0; padding: 2px; flex: 1; }
+  #start-menu li { display: flex; align-items: center; gap: 10px; padding: 7px 10px; font-size: 13px; }
+  #start-menu li:hover { background: #000080; color: #fff; }
+  #start-menu li .mi { font-size: 20px; width: 24px; text-align: center; }
+  #start-menu li.sep { height: 2px; padding: 0; margin: 3px 0; border-top: 1px solid #808080; border-bottom: 1px solid #fff; }
+  #start-menu li.sep:hover { background: none; }
+
+  /* ---------- shutdown screen ---------- */
+  #shutdown {
+    display: none; position: fixed; inset: 0; z-index: 200000; background: #000;
+    color: #ff9a00; font: 20px "Courier New", monospace; text-align: center;
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  #shutdown.show { display: flex; }
+
+  /* ---------- small screens: windows go full-size ---------- */
+  @media (max-width: 600px) {
+    .window { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 30px) !important; max-height: none; }
+    .task { flex-basis: 90px; }
+  }
 </style>
 </head>
 <body>
 
-<div class="marquee-wrap">
-  <marquee scrollamount="8">*** WELCOME TO MY HOMEPAGE!!! *** THANKS FOR VISITING *** SIGN MY GUESTBOOK *** </marquee>
+<!-- ===================== DESKTOP ICONS ===================== -->
+<div id="desktop">
+  <button class="icon" data-app="welcome"><span class="glyph">📄</span><span class="label">Welcome.txt</span></button>
+  <button class="icon" data-app="about"><span class="glyph">👤</span><span class="label">About Me</span></button>
+  <button class="icon" data-app="links"><span class="glyph">🌐</span><span class="label">Links</span></button>
+  <button class="icon" data-app="email"><span class="glyph">✉️</span><span class="label">Email Me</span></button>
+  <!-- WEBRING ICON GOES HERE LATER -->
 </div>
 
-<h1>~*~ Welcome to Sham's Corner of the Web ~*~</h1>
-<p class="blink">🚧 UNDER CONSTRUCTION 🚧</p>
+<!-- ===================== WINDOWS =====================
+     Each window is: id="win-NAME", plus data-title, data-icon.
+     Whatever is inside becomes the window's content.            -->
 
-<table class="nav">
-  <tr>
-    <td><a href="#about">About Me</a></td>
-    <td><a href="#links">Cool Links</a></td>
-    <td><a href="#guestbook">Guestbook</a></td>
-    <td><a href="mailto:you@example.com">E-mail Me!</a></td>
-  </tr>
-</table>
+<section class="window" id="win-welcome" data-title="Welcome.txt - Notepad" data-icon="📄"
+         style="left:120px; top:30px; width:460px;">
+  <div class="paper">
+    <h1>Welcome to Sham's Computer!</h1>
+    <p>Hi, I'm Sham. This is my little corner of the internet.</p>
+    <p>Double-click the icons on the desktop, or use the <b>Start</b> button in the bottom-left corner to open things. You can drag windows around, minimize them, and switch between them on the taskbar.</p>
+    <p><i>[Put your main content here: a short intro, what you're working on, whatever you like.]</i></p>
+  </div>
+</section>
 
-<div class="box" id="about">
-  <h2><u>About Me</u></h2>
-  <p>Hi!!! I'm Sham and this is my website. I like [your stuff here].</p>
-  <p><font color="#ff9900" size="5"><b>Please enjoy your stay!</b></font></p>
+<section class="window" id="win-about" data-title="About Me" data-icon="👤"
+         style="left:170px; top:70px; width:420px;">
+  <div class="row">
+    <div class="big">🧑‍💻</div>
+    <div>
+      <h2>Sham</h2>
+      <p>Based in: [your city]<br>Into: [hobby], [hobby], [hobby]<br>Currently: [what you're up to]</p>
+    </div>
+  </div>
+  <div class="paper" style="margin-top:8px;">
+    <p>[Write a few sentences about yourself here.]</p>
+  </div>
+</section>
+
+<section class="window" id="win-links" data-title="Links" data-icon="🌐"
+         style="left:220px; top:100px; width:380px;">
+  <h2>My Favorite Places</h2>
+  <div class="paper">
+    <ul>
+      <li><a href="https://github.com/i-m-sham" target="_blank" rel="noopener">My GitHub</a></li>
+      <li><a href="https://gifcities.org" target="_blank" rel="noopener">GifCities</a></li>
+      <li><a href="https://web.archive.org" target="_blank" rel="noopener">The Wayback Machine</a></li>
+      <li><a href="https://neocities.org" target="_blank" rel="noopener">Neocities</a></li>
+    </ul>
+  </div>
+</section>
+
+<section class="window" id="win-email" data-title="New Message" data-icon="✉️"
+         style="left:260px; top:60px; width:400px;">
+  <label>To:</label>
+  <input type="text" value="you@example.com" readonly>
+  <label for="subj">Subject:</label>
+  <input type="text" id="subj" placeholder="Hi Sham!">
+  <label for="msg">Message:</label>
+  <textarea id="msg"></textarea>
+  <p style="text-align:right; margin:8px 0 0;"><button class="btn" id="send">Send</button></p>
+</section>
+
+<!-- WEBRING WINDOW GOES HERE LATER -->
+
+<!-- ===================== TASKBAR ===================== -->
+<div id="taskbar">
+  <button id="start-btn" class="raised"><span>🪟</span> Start</button>
+  <div id="tasks"></div>
+  <div id="tray"><span>🔊</span><span id="clock">--:--</span></div>
 </div>
 
-<div class="box" id="links">
-  <h2><u>Cool Links</u></h2>
-  <ul style="list-style: square; display: inline-block; text-align: left;">
-    <li><a href="https://github.com/i-m-sham">My GitHub</a></li>
-    <li><a href="https://gifcities.org">GifCities (GeoCities GIF archive)</a></li>
-    <li><a href="https://web.archive.org">The Wayback Machine</a></li>
+<!-- ===================== START MENU ===================== -->
+<div id="start-menu" class="raised">
+  <div class="banner">Sham<span>95</span></div>
+  <ul>
+    <li data-app="welcome"><span class="mi">📄</span> Welcome.txt</li>
+    <li data-app="about"><span class="mi">👤</span> About Me</li>
+    <li data-app="links"><span class="mi">🌐</span> Links</li>
+    <li data-app="email"><span class="mi">✉️</span> Email Me</li>
+    <!-- WEBRING START MENU ITEM GOES HERE LATER -->
+    <li class="sep"></li>
+    <li data-href="https://github.com/i-m-sham"><span class="mi">🐙</span> GitHub</li>
+    <li class="sep"></li>
+    <li data-action="shutdown"><span class="mi">⏻</span> Shut Down...</li>
   </ul>
 </div>
 
-<div class="box" id="guestbook">
-  <h2><u>Guestbook</u></h2>
-  <p>Sign my guestbook! (Hook this up to a form service or a GitHub Discussions link.)</p>
-</div>
-
-<p>You are visitor number</p>
-<div class="counter" id="count">000000</div>
-
-<hr width="60%">
-<p>
-  <span class="badge">Made with<br>Notepad</span>
-  <span class="badge">Best viewed<br>at 800x600</span>
-  <span class="badge">Get Netscape<br>Now!</span>
-</p>
-<p><small>© 2026 Sham. Last updated: <span id="date"></span></small></p>
+<div id="shutdown">It's now safe to turn off<br>your computer.<br><br><small>(click anywhere to restart)</small></div>
 
 <script>
-  // Fake visitor counter (per-browser; see notes below for a real one)
-  try {
-    let n = parseInt(localStorage.getItem("visits") || "1337", 10) + 1;
-    localStorage.setItem("visits", n);
-    document.getElementById("count").textContent = String(n).padStart(6, "0");
-  } catch (e) {}
+(() => {
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const tasks = $('#tasks'), startBtn = $('#start-btn'), startMenu = $('#start-menu');
+  const apps = {};
+  let z = 10, active = null;
 
-  document.getElementById("date").textContent = new Date().toLocaleDateString();
+  /* ---- build window chrome ---- */
+  $$('.window').forEach(win => {
+    const id = win.id.replace('win-', '');
+    const content = document.createElement('div');
+    content.className = 'content';
+    while (win.firstChild) content.appendChild(win.firstChild);
 
-  // Sparkle cursor trail
-  const bits = ["✨", "⭐", "💫", "🌟"];
-  document.addEventListener("mousemove", (e) => {
-    const s = document.createElement("div");
-    s.className = "sparkle";
-    s.textContent = bits[Math.floor(Math.random() * bits.length)];
-    s.style.left = e.clientX + "px";
-    s.style.top = e.clientY + "px";
-    document.body.appendChild(s);
-    setTimeout(() => s.remove(), 900);
+    const bar = document.createElement('div');
+    bar.className = 'titlebar';
+    bar.innerHTML =
+      `<span>${win.dataset.icon}</span><span class="ttext">${win.dataset.title}</span>` +
+      `<span class="tbtns"><button class="min" title="Minimize">_</button>` +
+      `<button class="max" title="Maximize">▢</button>` +
+      `<button class="close" title="Close">✕</button></span>`;
+    win.append(bar, content);
+
+    apps[id] = { win, btn: null, icon: win.dataset.icon, title: win.dataset.title };
+
+    win.addEventListener('pointerdown', () => focusApp(id));
+    $('.min', bar).addEventListener('click', () => minimize(id));
+    $('.max', bar).addEventListener('click', () => win.classList.toggle('maxed'));
+    $('.close', bar).addEventListener('click', () => closeApp(id));
+    bar.addEventListener('dblclick', e => {
+      if (!e.target.closest('button')) win.classList.toggle('maxed');
+    });
+
+    /* dragging */
+    bar.addEventListener('pointerdown', e => {
+      if (e.target.closest('button') || win.classList.contains('maxed')) return;
+      const r = win.getBoundingClientRect();
+      const dx = e.clientX - r.left, dy = e.clientY - r.top;
+      bar.setPointerCapture(e.pointerId);
+      const move = ev => {
+        const x = Math.min(Math.max(ev.clientX - dx, 80 - r.width), innerWidth - 80);
+        const y = Math.min(Math.max(ev.clientY - dy, 0), innerHeight - 30 - 24);
+        win.style.left = x + 'px';
+        win.style.top = y + 'px';
+      };
+      const up = () => {
+        bar.removeEventListener('pointermove', move);
+        bar.removeEventListener('pointerup', up);
+        bar.removeEventListener('pointercancel', up);
+      };
+      bar.addEventListener('pointermove', move);
+      bar.addEventListener('pointerup', up);
+      bar.addEventListener('pointercancel', up);
+    });
   });
+
+  /* ---- window management ---- */
+  function refresh() {
+    $$('.window').forEach(w => w.classList.toggle('active', active && w === apps[active].win));
+    Object.entries(apps).forEach(([id, a]) => {
+      if (a.btn) a.btn.classList.toggle('pressed', id === active && a.win.classList.contains('show'));
+    });
+  }
+  function focusApp(id) {
+    active = id;
+    apps[id].win.style.zIndex = ++z;
+    refresh();
+  }
+  function openApp(id) {
+    const a = apps[id];
+    if (!a) return;
+    if (!a.btn) {
+      a.btn = document.createElement('button');
+      a.btn.className = 'task';
+      a.btn.textContent = `${a.icon} ${a.title}`;
+      a.btn.addEventListener('click', () => {
+        if (a.win.classList.contains('show') && active === id) minimize(id);
+        else openApp(id);
+      });
+      tasks.appendChild(a.btn);
+    }
+    a.win.classList.add('show');
+    focusApp(id);
+  }
+  function minimize(id) {
+    apps[id].win.classList.remove('show');
+    if (active === id) active = null;
+    refresh();
+  }
+  function closeApp(id) {
+    const a = apps[id];
+    a.win.classList.remove('show', 'maxed');
+    if (a.btn) { a.btn.remove(); a.btn = null; }
+    if (active === id) active = null;
+    refresh();
+  }
+
+  /* ---- desktop icons ---- */
+  const coarse = matchMedia('(pointer: coarse)').matches;
+  $$('.icon').forEach(ic => {
+    ic.addEventListener('click', e => {
+      e.stopPropagation();
+      $$('.icon').forEach(i => i.classList.remove('sel'));
+      ic.classList.add('sel');
+      if (coarse) openApp(ic.dataset.app);   // single tap on touch screens
+    });
+    ic.addEventListener('dblclick', () => openApp(ic.dataset.app));
+    ic.addEventListener('keydown', e => { if (e.key === 'Enter') openApp(ic.dataset.app); });
+  });
+  $('#desktop').addEventListener('click', () => $$('.icon').forEach(i => i.classList.remove('sel')));
+
+  /* ---- start menu ---- */
+  const closeMenu = () => { startMenu.classList.remove('show'); startBtn.classList.remove('down'); };
+  startBtn.addEventListener('click', () => {
+    startMenu.classList.toggle('show');
+    startBtn.classList.toggle('down');
+  });
+  document.addEventListener('pointerdown', e => {
+    if (!startMenu.contains(e.target) && !startBtn.contains(e.target)) closeMenu();
+  });
+  startMenu.addEventListener('click', e => {
+    const li = e.target.closest('li');
+    if (!li) return;
+    closeMenu();
+    if (li.dataset.app) openApp(li.dataset.app);
+    else if (li.dataset.href) window.open(li.dataset.href, '_blank', 'noopener');
+    else if (li.dataset.action === 'shutdown') $('#shutdown').classList.add('show');
+  });
+  $('#shutdown').addEventListener('click', () => $('#shutdown').classList.remove('show'));
+
+  /* ---- clock ---- */
+  const tick = () => {
+    $('#clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  };
+  tick(); setInterval(tick, 10000);
+
+  /* ---- email window ---- */
+  $('#send').addEventListener('click', () => {
+    const s = encodeURIComponent($('#subj').value || 'Hello from your website');
+    const b = encodeURIComponent($('#msg').value);
+    location.href = `mailto:you@example.com?subject=${s}&body=${b}`;
+  });
+
+  /* ---- open the main content on load ---- */
+  openApp('welcome');
+})();
 </script>
 </body>
 </html>
