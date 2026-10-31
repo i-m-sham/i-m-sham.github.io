@@ -5,353 +5,450 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sham's Computer</title>
 <style>
-  * { box-sizing: border-box; }
-  html, body { margin: 0; height: 100%; overflow: hidden; }
-  body {
-    background: #008080;
-    font: 12px Tahoma, "MS Sans Serif", Verdana, sans-serif;
-    color: #000;
-    user-select: none;
-  }
-  button { font: inherit; color: inherit; }
-  a { color: #0000ee; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#000}
+  body{font:12px Tahoma,Verdana,sans-serif;color:#000;user-select:none;-webkit-user-select:none}
+  button{font:inherit;color:inherit}
+  [hidden]{display:none!important}
+  a{color:#0000ee}
+  @keyframes blink{to{visibility:hidden}}
 
-  /* ---------- bevels ---------- */
-  .raised {
-    background: #c0c0c0;
-    border: 2px solid; border-color: #fff #404040 #404040 #fff;
-    box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
-  }
-  .btn {
-    background: #c0c0c0; padding: 4px 16px; min-width: 70px;
-    border: 2px solid; border-color: #fff #404040 #404040 #fff;
-    box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
-  }
-  .btn:active { border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080; }
-  .paper { background: #fff; padding: 10px; border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px #404040; }
+  /* ================= BOOT SCREENS ================= */
+  .screen{position:fixed;inset:0;z-index:400000;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;cursor:pointer}
+  .screen.show{display:flex}
+  #power{background:#000;color:#aaa;font:16px "Courier New",monospace;gap:14px}
+  #power b{color:#fff;font-size:20px;animation:blink 1.2s steps(2,start) infinite}
+  #boot{background:#000;color:#fff;gap:34px}
+  .logo{font:bold 60px/1 "Trebuchet MS",Arial,sans-serif;letter-spacing:1px}
+  .logo sup{font-size:26px;font-style:italic;color:#ff8a1f;margin-left:4px}
+  .edition{font:italic 16px "Trebuchet MS",sans-serif;color:#9ab;margin-top:8px}
+  .bar{position:relative;width:210px;height:20px;border:2px solid #b8b8b8;border-radius:7px;overflow:hidden}
+  .blocks{position:absolute;top:2px;left:0;height:12px;display:flex;gap:3px;animation:run 1.9s linear infinite}
+  .blocks b{width:14px;height:100%;border-radius:2px;background:linear-gradient(#2f6ee8,#8fb7ff 50%,#2f6ee8)}
+  @keyframes run{from{transform:translateX(-52px)}to{transform:translateX(210px)}}
+  .copy{position:absolute;bottom:18px;font-size:11px;color:#888}
+  #welcome{background:linear-gradient(90deg,#5a7edc,#3a60d4 50%,#2a4fc8);color:#fff}
+  #welcome::before,#welcome::after{content:"";position:absolute;left:0;right:0;height:80px;background:#00309c}
+  #welcome::before{top:0;border-bottom:2px solid #f2a33a}
+  #welcome::after{bottom:0;border-top:2px solid #f2a33a}
+  #welcome h1{font:italic 52px "Trebuchet MS",sans-serif;margin:0;text-shadow:3px 3px 4px #00309c}
+  #welcome p{margin:10px 0 0;font:16px Tahoma,sans-serif}
 
-  /* ---------- scenery (desktop wallpaper) ---------- */
-  .scenery {
-    position: fixed; inset: 0 0 30px 0; z-index: 0; overflow: hidden;
-    background: linear-gradient(#2b6fd4 0%, #6fb1ee 55%, #c4e4ff 100%);
-  }
-  .clouds {
-    position: absolute; inset: 0 0 38% 0;
-    background:
-      radial-gradient(ellipse 90px 26px at 120px 70px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 60px 20px at 175px 56px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 70px 22px at 70px 80px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 110px 30px at 430px 150px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 70px 22px at 500px 132px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 80px 24px at 370px 160px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 80px 22px at 620px 60px, #fff 45%, transparent 100%),
-      radial-gradient(ellipse 50px 16px at 665px 48px, #fff 45%, transparent 100%);
-    background-size: 700px 100%;
-    background-repeat: repeat-x;
-    animation: drift 120s linear infinite;
-  }
-  @keyframes drift { from { background-position: 0 0; } to { background-position: 700px 0; } }
-  .hills {
-    position: absolute; left: 0; right: 0; bottom: 0; height: 34%;
-    background:
-      radial-gradient(ellipse 80% 55% at 50% 100%, #2f8a28 96%, transparent 100%),
-      radial-gradient(ellipse 55% 100% at 18% 100%, #5fbf45 96%, transparent 100%),
-      radial-gradient(ellipse 65% 85% at 86% 100%, #3f9a2f 96%, transparent 100%);
-  }
+  /* ================= OS ROOT + WALLPAPER ================= */
+  #os{position:fixed;inset:0;opacity:0;visibility:hidden}
+  #os.on{opacity:1;visibility:visible;transition:opacity 1s}
+  #wallpaper{position:fixed;inset:0 0 34px 0;overflow:hidden;background:#000033;z-index:0}
+  #wall{position:absolute;left:0;top:0;border:0;pointer-events:none;transform-origin:0 0;background:#000033}
 
-  /* ---------- desktop content ---------- */
-  #desktop {
-    position: absolute; inset: 0 0 30px 0; z-index: 1; overflow: auto; padding: 8px;
-  }
-  .hero { text-align: center; padding: 4vh 12px 18px; color: #fff; }
-  .hero h1 {
-    font: bold 46px/1.1 Arial, Helvetica, sans-serif; margin: 0 0 10px;
-    text-shadow: 3px 3px 0 #000080;
-  }
-  #type {
-    min-height: 1.5em; font: 16px "Courier New", monospace; text-shadow: 1px 1px #000080;
-  }
-  #type::after { content: "\2588"; margin-left: 2px; animation: blink 1s steps(2, start) infinite; }
-  @keyframes blink { to { visibility: hidden; } }
-  .cards {
-    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
-    align-items: flex-start; padding: 0 12px 16px;
-  }
-  #readme { width: 360px; max-width: 92vw; }
-  #calendar { width: 230px; max-width: 92vw; }
+  /* ================= WINDOW FRAMES (XP-style) ================= */
+  .frame{background:#ece9d8;border:3px solid #6a85d6;border-top:0;border-radius:8px 8px 0 0;box-shadow:2px 3px 10px rgba(0,0,0,.5)}
+  .frame.active{border-color:#0831d9}
+  .window{display:none;position:absolute;flex-direction:column;max-width:100vw;max-height:calc(100% - 38px)}
+  .window.show{display:flex}
+  .window.maxed{left:0!important;top:0!important;width:100%!important;height:calc(100% - 34px)!important;max-height:none;border-radius:0}
+  .titlebar{flex:none;height:28px;padding:0 5px 0 8px;display:flex;align-items:center;gap:6px;border-radius:5px 5px 0 0;color:#fff;font-weight:bold;font-size:13px;touch-action:none;
+    background:linear-gradient(#7c9be6,#7592e0 40%,#7a96df 90%,#6a85d6);text-shadow:none}
+  .frame.active .titlebar{text-shadow:1px 1px #0a246a;
+    background:linear-gradient(#0997ff 0%,#0053ee 8%,#0050ee 40%,#0066ff 88%,#005bff 93%,#003dd7 100%)}
+  .ttext{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tbtns{display:flex;gap:2px}
+  .tbtns button{width:21px;height:21px;padding:0;line-height:1;border:1px solid #fff;border-radius:3px;color:#fff;font:bold 11px Tahoma,sans-serif;
+    background:radial-gradient(circle at 30% 30%,#7aa5f8,#2a5fe0 75%)}
+  .tbtns .close{background:radial-gradient(circle at 30% 30%,#ec9b8b,#d1481f 75%)}
+  .tbtns button:hover{filter:brightness(1.15)}
+  .content{flex:1;min-height:0;overflow:auto;padding:12px;background:#ece9d8;user-select:text;-webkit-user-select:text}
+  .content.flush{display:flex;flex-direction:column;padding:0}
+  .content h2{font-size:15px;margin:0 0 6px}
+  .content p{margin:0 0 8px;line-height:1.45}
+  .paper{background:#fff;border:1px solid #7f9db9;padding:10px}
+  .row{display:flex;gap:12px;align-items:flex-start}
+  .big{font-size:42px;line-height:1}
+  table.facts{border-collapse:collapse;width:100%}
+  table.facts td{padding:3px 6px;border-bottom:1px solid #e5e2d3}
+  table.facts td:first-child{font-weight:bold;width:90px}
+  label{display:block;margin:6px 0 2px}
+  input[type=text],textarea{width:100%;font:inherit;padding:3px 5px;background:#fff;border:1px solid #7f9db9}
+  textarea{height:120px;resize:none}
+  .btn{min-width:78px;padding:4px 14px;border:1px solid #003c74;border-radius:3px;background:linear-gradient(#fff,#ece9d8 85%,#d6d0c5)}
+  .btn:hover{box-shadow:inset 0 0 0 2px #f9c24e}
+  .btn:active{background:linear-gradient(#cec9b8,#ece9d8)}
 
-  /* ---------- panels (static windows on the desktop) + windows ---------- */
-  .panel, .window {
-    background: #c0c0c0; padding: 2px;
-    border: 2px solid; border-color: #dfdfdf #000 #000 #dfdfdf;
-    box-shadow: inset -1px -1px #808080, inset 1px 1px #fff, 2px 2px 0 rgba(0,0,0,.35);
-  }
-  .window { display: none; position: absolute; flex-direction: column; max-width: 100vw; max-height: calc(100% - 34px); }
-  .window.show { display: flex; }
-  .window.maxed { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 30px) !important; max-height: none; }
-  .titlebar {
-    flex: none; height: 20px; padding: 2px 3px;
-    display: flex; align-items: center; gap: 4px;
-    background: linear-gradient(90deg, #808080, #b5b5b5);
-    color: #fff; font-weight: bold; touch-action: none;
-  }
-  .window.active .titlebar, .panel .titlebar { background: linear-gradient(90deg, #000080, #1084d0); }
-  .ttext { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .tbtns { display: flex; gap: 2px; }
-  .tbtns button {
-    width: 16px; height: 14px; padding: 0; line-height: 1;
-    font: bold 9px Tahoma, sans-serif; color: #000; background: #c0c0c0;
-    border: 1px solid; border-color: #fff #404040 #404040 #fff;
-    box-shadow: inset -1px -1px #808080;
-  }
-  .tbtns button:active { border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080; }
-  .content, .pbody { padding: 10px; user-select: text; }
-  .content { flex: 1; min-height: 0; overflow: auto; }
-  .content h2, .pbody h2 { font-size: 14px; margin: 0 0 6px; }
-  .content p, .pbody p { margin: 0 0 8px; line-height: 1.4; }
-  .content ul { margin: 0; padding-left: 20px; line-height: 1.8; }
-  .row { display: flex; gap: 12px; align-items: flex-start; }
-  .big { font-size: 40px; line-height: 1; }
-  label { display: block; margin: 6px 0 2px; }
-  input[type=text], textarea {
-    width: 100%; font: inherit; padding: 3px; background: #fff;
-    border: 2px solid; border-color: #808080 #fff #fff #808080; box-shadow: inset 1px 1px #404040;
-  }
-  textarea { height: 110px; resize: none; }
+  /* folder window */
+  .addr{display:flex;align-items:center;gap:6px;padding:4px 8px;border-bottom:1px solid #c0bcab}
+  .addr .field{flex:1;background:#fff;border:1px solid #7f9db9;padding:2px 6px}
+  .grid{flex:1;display:flex;flex-wrap:wrap;align-content:flex-start;gap:6px;padding:12px;background:#fff;min-height:150px}
+  .fi{width:92px;padding:6px 2px;text-align:center;background:none;border:1px solid transparent}
+  .fi .g{display:block;font-size:36px;line-height:1.1}
+  .fi .l{display:inline-block;margin-top:3px;padding:1px 3px;font-size:12px}
+  .fi.sel .l{background:#316ac5;color:#fff}
+  .status{padding:3px 8px;border-top:1px solid #c0bcab;font-size:11px}
 
-  /* calendar */
-  .calhead { font-weight: bold; text-align: center; margin-bottom: 6px; }
-  #cal table { width: 100%; border-collapse: collapse; background: #fff; }
-  #cal th, #cal td { text-align: center; padding: 3px 0; }
-  #cal th { background: #c0c0c0; }
-  #cal td.today { background: #000080; color: #fff; font-weight: bold; }
+  /* ================= TASKBAR ================= */
+  #taskbar{position:fixed;left:0;right:0;bottom:0;height:34px;z-index:100000;display:flex;align-items:center;gap:6px;
+    background:linear-gradient(#3168d5 0%,#4993e6 8%,#2157d7 20%,#245edb 80%,#1941a5 100%)}
+  #start-btn{height:100%;padding:0 24px 0 14px;border:0;border-radius:0 14px 14px 0;color:#fff;
+    font:italic bold 21px "Trebuchet MS",Tahoma,sans-serif;text-shadow:1px 1px 2px #000;
+    background:linear-gradient(#5db35b,#3c963a 20%,#3c963a 80%,#2c7a2a);
+    box-shadow:inset 0 2px 2px rgba(255,255,255,.45),2px 0 4px rgba(0,0,0,.4)}
+  #start-btn:hover{filter:brightness(1.08)}
+  #start-btn.down{filter:brightness(.88)}
+  #tasks{flex:1;display:flex;gap:3px;min-width:0}
+  .task{flex:0 1 170px;min-width:0;height:26px;padding:0 8px;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    color:#fff;border:1px solid #1a3fa0;border-radius:3px;background:linear-gradient(#3d86ef,#2a6ae0)}
+  .task:hover{filter:brightness(1.1)}
+  .task.pressed{background:linear-gradient(#1e50b8,#2a5fd0);box-shadow:inset 1px 1px 3px rgba(0,0,0,.55);font-weight:bold}
+  #tray{height:100%;padding:0 14px;display:flex;align-items:center;gap:10px;color:#fff;border-left:1px solid #0a4fb0;
+    background:linear-gradient(#0f8bea,#1294ee 50%,#0b6fd2)}
+  #spk{background:none;border:0;padding:0;font-size:15px}
 
-  /* ---------- taskbar ---------- */
-  #taskbar {
-    position: fixed; left: 0; right: 0; bottom: 0; height: 30px; z-index: 100000;
-    display: flex; align-items: center; gap: 4px; padding: 2px;
-    background: #c0c0c0; border-top: 2px solid #fff; box-shadow: inset 0 1px #dfdfdf;
-  }
-  #start-btn { height: 24px; padding: 0 14px; font-weight: bold; font-size: 13px; }
-  #start-btn.down { border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080; }
-  #tasks { flex: 1; display: flex; gap: 2px; min-width: 0; }
-  .task {
-    flex: 0 1 160px; min-width: 0; height: 24px; padding: 0 6px; text-align: left;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    background: #c0c0c0; border: 2px solid; border-color: #fff #404040 #404040 #fff;
-    box-shadow: inset -1px -1px #808080, inset 1px 1px #dfdfdf;
-  }
-  .task.pressed {
-    font-weight: bold; border-color: #404040 #fff #fff #404040; box-shadow: inset 1px 1px #808080;
-    background: repeating-conic-gradient(#c0c0c0 0 25%, #fff 0 50%) 0 0 / 2px 2px;
-  }
-  #tray {
-    height: 24px; padding: 0 10px; display: flex; align-items: center; gap: 6px;
-    border: 2px solid; border-color: #808080 #fff #fff #808080;
-  }
+  /* ================= START MENU ================= */
+  #start-menu{display:none;position:fixed;left:0;bottom:34px;width:400px;max-width:100vw;z-index:100001;overflow:hidden;
+    border:2px solid #0a3fc0;border-bottom:0;border-radius:8px 8px 0 0;background:#fff;box-shadow:3px 3px 8px rgba(0,0,0,.5)}
+  #start-menu.show{display:block}
+  .sm-head{height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;color:#fff;font:bold 18px Tahoma,sans-serif;text-shadow:1px 1px #0a246a;
+    background:linear-gradient(#1c63d6,#0e4fc7 60%,#0a3fb0)}
+  .sm-head .av{width:40px;height:40px;border-radius:5px;border:2px solid #fff;background:#cfe0ff;display:flex;align-items:center;justify-content:center;font-size:24px}
+  .sm-body{display:flex;min-height:310px;border-top:2px solid #f2a33a}
+  .sm-left{flex:1.15;background:#fff;padding:6px;display:flex;flex-direction:column;gap:4px}
+  .sm-right{flex:1;background:#d3e5fa;border-left:1px solid #95bdee;padding:6px}
+  #q{width:100%;padding:5px 7px;border:1px solid #7f9db9;border-radius:3px;font:13px Tahoma,sans-serif;margin-bottom:4px;user-select:text;-webkit-user-select:text}
+  .sm-sub{font-weight:bold;color:#0a3fb0;padding:2px 4px;font-size:11px;text-transform:uppercase}
+  .sm-item{display:flex;align-items:center;gap:9px;padding:7px 6px;border-radius:2px;font-size:13px}
+  .sm-item .mi{font-size:22px;width:28px;text-align:center}
+  .sm-item:hover,.sm-item.on{background:#316ac5;color:#fff}
+  .sm-empty{padding:12px 6px;color:#555}
+  .sm-foot{height:42px;display:flex;justify-content:flex-end;align-items:center;padding:0 10px;background:linear-gradient(#3b7fe5,#2d63d0);border-top:1px solid #0a3fc0}
+  .sm-off{display:flex;align-items:center;gap:6px;color:#fff;padding:4px 8px;background:none;border:0;border-radius:3px}
+  .sm-off:hover{background:rgba(255,255,255,.2)}
+  .sm-off i{font-style:normal;background:#d1481f;border:1px solid #fff;border-radius:3px;padding:0 4px}
 
-  /* ---------- start menu ---------- */
-  #start-menu { display: none; position: fixed; left: 2px; bottom: 30px; width: 210px; z-index: 100001; padding: 2px; }
-  #start-menu.show { display: flex; }
-  .banner {
-    width: 26px; padding: 8px 3px; color: #fff; font: bold 20px Arial, sans-serif;
-    background: linear-gradient(0deg, #1084d0, #000080);
-    writing-mode: vertical-rl; transform: rotate(180deg); white-space: nowrap;
-  }
-  .banner span { font-weight: normal; }
-  #start-menu ul { list-style: none; margin: 0; padding: 2px; flex: 1; }
-  #start-menu li { display: flex; align-items: center; gap: 10px; padding: 7px 10px; font-size: 13px; }
-  #start-menu li:hover { background: #000080; color: #fff; }
-  #start-menu li .mi { font-size: 20px; width: 24px; text-align: center; }
-  #start-menu li.sep { height: 2px; padding: 0; margin: 3px 0; border-top: 1px solid #808080; border-bottom: 1px solid #fff; }
-  #start-menu li.sep:hover { background: none; }
+  /* ================= DIALOG + SHUTDOWN ================= */
+  #dialog{display:none;position:fixed;inset:0;z-index:150000;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.4)}
+  #dialog.show{display:flex}
+  #dialog .frame{width:380px;max-width:100%}
+  #dialog .btns{display:flex;justify-content:center;gap:10px;margin-top:14px}
+  #shutdown{display:none;position:fixed;inset:0;z-index:500000;text-align:center;align-items:center;justify-content:center;padding:20px;cursor:pointer}
+  #shutdown.show{display:flex}
+  #shutdown.s1{background:#3a60d4;color:#fff;font:italic 28px "Trebuchet MS",Arial,sans-serif;text-shadow:2px 2px #00309c;cursor:default}
+  #shutdown.s2{background:#000;color:#ff9a00;font:20px "Courier New",monospace}
 
-  /* ---------- shutdown dialog + screens ---------- */
-  #dialog { display: none; position: fixed; inset: 0; z-index: 150000; align-items: center; justify-content: center; padding: 12px; }
-  #dialog.show { display: flex; }
-  #dialog .panel { width: 340px; max-width: 100%; }
-  #dialog .row { align-items: center; }
-  #dialog .buttons { display: flex; justify-content: center; gap: 10px; margin-top: 14px; }
-
-  #shutdown {
-    display: none; position: fixed; inset: 0; z-index: 200000;
-    text-align: center; align-items: center; justify-content: center; padding: 20px;
+  @media (max-width:600px){
+    .window{left:0!important;top:0!important;width:100%!important;height:calc(100% - 34px)!important;max-height:none;border-radius:0}
+    .task{flex-basis:90px}
+    #start-menu{width:100vw}
   }
-  #shutdown.show { display: flex; }
-  #shutdown.stage1 { background: #008080; color: #fff; font: bold 22px Arial, sans-serif; text-shadow: 2px 2px #000; }
-  #shutdown.stage2 { background: #000; color: #ff9a00; font: 20px "Courier New", monospace; }
-
-  @media (max-width: 600px) {
-    .window { left: 0 !important; top: 0 !important; width: 100% !important; height: calc(100% - 30px) !important; max-height: none; }
-    .task { flex-basis: 90px; }
-    .hero h1 { font-size: 32px; }
-  }
-  @media (prefers-reduced-motion: reduce) { .clouds { animation: none; } }
 </style>
 </head>
 <body>
 
-<!-- ===================== WALLPAPER ===================== -->
-<div class="scenery"><div class="clouds"></div><div class="hills"></div></div>
+<!-- ============ BOOT SEQUENCE ============ -->
+<div id="power" class="screen show" tabindex="0" role="button" aria-label="Power on">
+  <b>&#9654; CLICK ANYWHERE TO POWER ON</b>
+  <span>(turn your sound on for the full experience)</span>
+</div>
 
-<!-- ===================== DESKTOP (your main content lives here) ===================== -->
-<div id="desktop">
-  <div class="hero">
-    <h1>Sham's Computer</h1>
-    <div id="type"></div>
+<div id="boot" class="screen">
+  <div>
+    <div class="logo">Sham<sup>OS</sup></div>
+    <div class="edition">Personal Edition</div>
+  </div>
+  <div class="bar"><span class="blocks"><b></b><b></b><b></b></span></div>
+  <div class="copy">Copyright &copy; 2026 Sham. Click to skip.</div>
+</div>
+
+<div id="welcome" class="screen">
+  <h1>welcome</h1>
+  <p>Loading your personal settings...</p>
+</div>
+
+<!-- ============ THE "OPERATING SYSTEM" ============ -->
+<div id="os">
+
+  <!-- Desktop wallpaper: a 2000s website you can see but never touch -->
+  <div id="wallpaper">
+    <iframe id="wall" title="Desktop wallpaper" aria-hidden="true" tabindex="-1" sandbox="" scrolling="no"></iframe>
   </div>
 
-  <div class="cards">
-    <div class="panel" id="readme">
-      <div class="titlebar"><span>📌</span><span class="ttext">README.txt</span></div>
-      <div class="pbody">
-        <div class="paper">
-          <h2>Hi, I'm Sham!</h2>
-          <p>[Put your main intro here: who you are, what you're working on, what this site is about.]</p>
-          <p><b>Tip:</b> the tabs along the bottom are my pages. Click one to open it, or use the Start button.</p>
+  <!-- ========== APPS (windows). Copy the pattern to add more. ========== -->
+
+  <section class="frame window" data-app="about" data-title="About Me" data-tab="About Me" data-icon="👤" style="left:140px;top:40px;width:440px">
+    <div class="row">
+      <div class="big">🧑‍💻</div>
+      <div>
+        <h2>Sham</h2>
+        <p>[One-line description of what you do]</p>
+      </div>
+    </div>
+    <div class="paper" style="margin-top:8px">
+      <table class="facts">
+        <tr><td>Based in</td><td>[your city]</td></tr>
+        <tr><td>Into</td><td>[hobby], [hobby], [hobby]</td></tr>
+        <tr><td>Currently</td><td>[what you're up to]</td></tr>
+      </table>
+      <p style="margin-top:10px">[Write a few sentences about yourself here.]</p>
+    </div>
+  </section>
+
+  <section class="frame window" data-app="email" data-title="New Message" data-tab="Email Me" data-icon="✉️" style="left:200px;top:70px;width:420px">
+    <label for="to">To:</label>
+    <input type="text" id="to" readonly>
+    <label for="subj">Subject:</label>
+    <input type="text" id="subj" placeholder="Hi Sham!">
+    <label for="msg">Message:</label>
+    <textarea id="msg"></textarea>
+    <p style="text-align:right;margin:10px 0 0"><button class="btn" id="send">Send</button></p>
+  </section>
+
+  <section class="frame window" data-app="social" data-flush="1" data-title="Social Media Links" data-tab="Social Media Links" data-icon="📁" style="left:260px;top:100px;width:460px">
+    <div class="addr"><span>Address</span><div class="field">📁 C:\Sham\Social Media Links</div></div>
+    <div class="grid" id="socgrid"></div>
+    <div class="status" id="sstatus"></div>
+  </section>
+
+  <!-- WEBRING WINDOW GOES HERE LATER (copy the pattern above) -->
+
+  <!-- ========== TASKBAR ========== -->
+  <div id="taskbar">
+    <button id="start-btn">start</button>
+    <div id="tasks"></div>
+    <div id="tray"><button id="spk" title="Mute / unmute">🔊</button><span id="clock">--:--</span></div>
+  </div>
+
+  <!-- ========== START MENU ========== -->
+  <div id="start-menu">
+    <div class="sm-head"><div class="av">🧑‍💻</div>Sham</div>
+    <div class="sm-body">
+      <div class="sm-left">
+        <input type="text" id="q" placeholder="Search programs and files..." autocomplete="off" spellcheck="false">
+        <div id="pinned"></div>
+        <div id="results" hidden></div>
+      </div>
+      <div class="sm-right" id="quick"></div>
+    </div>
+    <div class="sm-foot"><button class="sm-off" id="off"><i>⏻</i> Turn Off</button></div>
+  </div>
+
+  <!-- ========== TURN OFF DIALOG ========== -->
+  <div id="dialog">
+    <div class="frame active">
+      <div class="titlebar"><span>🖥️</span><span class="ttext">Turn off computer</span></div>
+      <div class="content" style="flex:none">
+        <div class="row" style="align-items:center">
+          <div class="big">🖥️</div>
+          <p style="margin:0">What do you want the computer to do?</p>
+        </div>
+        <div class="btns">
+          <button class="btn" id="d-off">Turn Off</button>
+          <button class="btn" id="d-restart">Restart</button>
+          <button class="btn" id="d-cancel">Cancel</button>
         </div>
       </div>
     </div>
-
-    <div class="panel" id="calendar">
-      <div class="titlebar"><span>📅</span><span class="ttext">Calendar</span></div>
-      <div class="pbody"><div id="cal"></div></div>
-    </div>
   </div>
 </div>
 
-<!-- ===================== WINDOWS =====================
-     Each is: id="win-NAME", data-title (window title), data-tab (taskbar label), data-icon.
-     Every window automatically gets a taskbar tab.                                     -->
-
-<section class="window" id="win-about" data-title="About Me" data-tab="About Me" data-icon="👤"
-         style="left:140px; top:50px; width:420px;">
-  <div class="row">
-    <div class="big">🧑‍💻</div>
-    <div>
-      <h2>Sham</h2>
-      <p>Based in: [your city]<br>Into: [hobby], [hobby], [hobby]<br>Currently: [what you're up to]</p>
-    </div>
-  </div>
-  <div class="paper" style="margin-top:8px;">
-    <p>[Write a few sentences about yourself here.]</p>
-  </div>
-</section>
-
-<section class="window" id="win-links" data-title="Links" data-tab="Links" data-icon="🌐"
-         style="left:200px; top:90px; width:380px;">
-  <h2>My Favorite Places</h2>
-  <div class="paper">
-    <ul>
-      <li><a href="https://github.com/i-m-sham" target="_blank" rel="noopener">My GitHub</a></li>
-      <li><a href="https://gifcities.org" target="_blank" rel="noopener">GifCities</a></li>
-      <li><a href="https://web.archive.org" target="_blank" rel="noopener">The Wayback Machine</a></li>
-      <li><a href="https://neocities.org" target="_blank" rel="noopener">Neocities</a></li>
-    </ul>
-  </div>
-</section>
-
-<section class="window" id="win-email" data-title="New Message" data-tab="Email Me" data-icon="✉️"
-         style="left:260px; top:70px; width:400px;">
-  <label for="to">To:</label>
-  <input type="text" id="to" readonly>
-  <label for="subj">Subject:</label>
-  <input type="text" id="subj" placeholder="Hi Sham!">
-  <label for="msg">Message:</label>
-  <textarea id="msg"></textarea>
-  <p style="text-align:right; margin:8px 0 0;"><button class="btn" id="send">Send</button></p>
-</section>
-
-<!-- WEBRING WINDOW GOES HERE LATER (copy the pattern above) -->
-
-<!-- ===================== TASKBAR ===================== -->
-<div id="taskbar">
-  <button id="start-btn" class="raised">Start</button>
-  <div id="tasks"></div>
-  <div id="tray"><span>🔊</span><span id="clock">--:--</span></div>
-</div>
-
-<!-- ===================== START MENU ===================== -->
-<div id="start-menu" class="raised">
-  <div class="banner">Sham<span>95</span></div>
-  <ul>
-    <li data-app="about"><span class="mi">👤</span> About Me</li>
-    <li data-app="links"><span class="mi">🌐</span> Links</li>
-    <li data-app="email"><span class="mi">✉️</span> Email Me</li>
-    <!-- WEBRING START MENU ITEM GOES HERE LATER -->
-    <li class="sep"></li>
-    <li data-href="https://github.com/i-m-sham"><span class="mi">🐙</span> GitHub</li>
-    <li class="sep"></li>
-    <li data-action="shutdown"><span class="mi">⏻</span> Shut Down...</li>
-  </ul>
-</div>
-
-<!-- ===================== SHUT DOWN ===================== -->
-<div id="dialog">
-  <div class="panel">
-    <div class="titlebar"><span>🖥️</span><span class="ttext">Shut Down Windows</span></div>
-    <div class="pbody">
-      <div class="row">
-        <div class="big">🖥️</div>
-        <p>Are you sure you want to shut down your computer?</p>
-      </div>
-      <div class="buttons">
-        <button class="btn" id="yes">Yes</button>
-        <button class="btn" id="no">No</button>
-      </div>
-    </div>
-  </div>
-</div>
 <div id="shutdown"></div>
+
+<!-- =====================================================================
+     THE WALLPAPER SITE (a 2000s homepage rendered inside a locked iframe).
+     Edit the text freely. {{DATE}}, {{YEAR}}, {{COUNT}} are filled in by script.
+     The "Webring" box is where your webring will go.
+     ===================================================================== -->
+<script type="text/html" id="wallsrc">
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{background-color:#000033;background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#ffff66 1px,transparent 1px);
+    background-size:40px 40px,70px 70px;background-position:0 0,20px 30px;color:#00ff66;
+    font:14px/1.35 "Comic Sans MS","Comic Sans",cursive;text-align:center}
+  .top{background:#ff00ff;color:#ffff00;font-weight:bold;padding:3px}
+  h1{margin:10px 0 2px;font-size:46px;background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .blink{animation:b 1s steps(2,start) infinite;color:#ffcc00;font-weight:bold}
+  @keyframes b{to{visibility:hidden}}
+  .cols{display:grid;grid-template-columns:190px 1fr 220px;gap:14px;padding:8px 18px;text-align:left}
+  .box{border:4px ridge #c0c0c0;background:#000066;padding:8px 10px;margin-bottom:12px}
+  .box h3{margin:0 0 6px;color:#ffff00;text-decoration:underline;font-size:15px}
+  .box p{margin:0 0 6px}
+  .lnk{color:#66ccff;text-decoration:underline;display:block;margin:2px 0}
+  .bar{height:10px;background:#333;border:1px solid #fff;margin:2px 0 6px}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,#0f0,#ff0)}
+  .count{display:inline-block;background:#000;color:#f00;font:bold 18px "Courier New",monospace;letter-spacing:4px;padding:3px 8px;border:2px inset #888}
+  .badge{display:inline-block;width:88px;height:31px;line-height:12px;padding-top:4px;border:1px solid #fff;background:#444;color:#fff;font:10px Verdana,sans-serif;text-align:center;margin:2px}
+  .dash{border-style:dashed;border-color:#ff66ff;text-align:center}
+  .news b{color:#ff9900}
+  ul{margin:0;padding-left:20px}
+  .foot{text-align:center;font-size:12px;color:#aaa;padding:2px 0 8px}
+  @media (max-width:899px){.cols{grid-template-columns:1fr 1fr}.side2{display:none}}
+</style></head>
+<body>
+  <div class="top"><marquee scrollamount="7">*** WELCOME TO SHAM'S HOMEPAGE *** [your tagline here] *** THANKS FOR VISITING *** BEST VIEWED AT 1024x768 ***</marquee></div>
+  <h1>~*~ Sham's Homepage ~*~</h1>
+  <div class="blink">:: UNDER CONSTRUCTION ::</div>
+
+  <div class="cols">
+    <div class="side">
+      <div class="box">
+        <h3>Menu</h3>
+        <span class="lnk">Home</span><span class="lnk">About Me</span><span class="lnk">My Projects</span>
+        <span class="lnk">Photos</span><span class="lnk">Cool Links</span><span class="lnk">Guestbook</span>
+      </div>
+      <div class="box" style="text-align:center">
+        <p>You are visitor number</p>
+        <div class="count">{{COUNT}}</div>
+        <p style="margin-top:8px"><span class="badge">Made with<br>Notepad</span><span class="badge">Get Netscape<br>Now!</span></p>
+      </div>
+    </div>
+
+    <div class="side main">
+      <div class="box">
+        <h3>Welcome, Traveler!!!</h3>
+        <p>Hi, I'm Sham and this is my personal corner of the web. [Write a short intro about who you are and what this site is about.]</p>
+        <p>Use the <b>start</b> button down below to explore the rest of my computer!</p>
+      </div>
+      <div class="box">
+        <h3>About Me</h3>
+        <p>Name: Sham<br>Location: [your city]<br>Occupation: [what you do]<br>Hobbies: [hobby], [hobby], [hobby]<br>Mood: caffeinated</p>
+        <p>Skills:</p>
+        <div class="bar"><i style="width:90%"></i></div>
+        <div class="bar"><i style="width:70%"></i></div>
+        <div class="bar"><i style="width:55%"></i></div>
+      </div>
+      <div class="box news">
+        <h3>What's New</h3>
+        <p><b>{{DATE}}</b> - Rebuilt the whole site as a computer!</p>
+        <p><b>[date]</b> - [something you shipped or learned]</p>
+        <p><b>[date]</b> - Webring coming soon!!</p>
+      </div>
+    </div>
+
+    <div class="side side2">
+      <div class="box">
+        <h3>My Top 5</h3>
+        <ul><li>[favorite thing]</li><li>[favorite thing]</li><li>[favorite thing]</li><li>[favorite thing]</li><li>[favorite thing]</li></ul>
+      </div>
+      <div class="box">
+        <h3>Poll of the Week</h3>
+        <p>Best browser?</p>
+        <p>( ) Netscape<br>(o) Internet Explorer 6<br>( ) Opera</p>
+      </div>
+      <div class="box dash">
+        <h3>Webring</h3>
+        <p>[ coming soon ]</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="foot">&copy; {{YEAR}} Sham | Last updated {{DATE}} | Best viewed in Internet Explorer 6</div>
+</body></html>
+</script>
 
 <script>
 (() => {
-  const EMAIL = 'you@example.com';   // <-- put your real address here (used in two places)
+  /* ===================== CONFIG: edit these ===================== */
+  const EMAIL = 'you@example.com';
+  const RESUME_URL = 'https://example.com/your-resume.pdf';
+  const SOCIALS = [
+    { name: 'GitHub',      icon: '🐙', url: 'https://github.com/i-m-sham',         pin: true, kw: 'git code repos' },
+    { name: 'LinkedIn',    icon: '💼', url: 'https://www.linkedin.com/in/your-name', pin: true, kw: 'work career jobs' },
+    { name: 'Twitter / X', icon: '🐦', url: 'https://x.com/your-handle',                      kw: 'tweets x' },
+    { name: 'Instagram',   icon: '📷', url: 'https://instagram.com/your-handle',               kw: 'photos insta' },
+  ];
+  /* ============================================================== */
 
   const $  = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const openUrl = u => window.open(u, '_blank', 'noopener');
+  const coarse = matchMedia('(pointer: coarse)').matches;
+
+  /* ---------- basic cursor (original arrow) ---------- */
+  const arrow = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M4 2v18l4.6-4.2 3.1 6.6 3-1.4-3.1-6.4H18z" fill="#fff" stroke="#000" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+  const cs = document.createElement('style');
+  cs.textContent =
+    '*{cursor:url("data:image/svg+xml,' + encodeURIComponent(arrow) + '") 4 2,default}' +
+    'a,a *{cursor:pointer}input[type=text],textarea{cursor:text}';
+  document.head.appendChild(cs);
+
+  /* ---------- sound (all synthesized, no audio files) ---------- */
+  let actx = null, master = null, muted = false;
+  function initAudio() {
+    if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    actx = new AC();
+    master = actx.createGain(); master.gain.value = 0.8; master.connect(actx.destination);
+    const d = actx.createDelay(1); d.delayTime.value = 0.23;       // soft echo for the shimmer
+    const fb = actx.createGain(); fb.gain.value = 0.38;
+    const wet = actx.createGain(); wet.gain.value = 0.35;
+    master.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(actx.destination);
+  }
+  function tone(freq, at, dur, type = 'sine', vol = 0.12) {
+    if (!actx || muted) return;
+    const t = actx.currentTime + at, o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(vol, t + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.05);
+  }
+  const sfx = {
+    startup()  { [392, 523.25, 587.33, 783.99].forEach((f, i) => tone(f, i * 0.2, 1.4, 'triangle', 0.1));
+                 [523.25, 659.25, 783.99, 1046.5].forEach(f => tone(f, 0.95, 2.8, 'sine', 0.07)); },
+    click()    { tone(1400, 0, 0.05, 'square', 0.02); },
+    open()     { tone(660, 0, 0.14, 'sine', 0.1); tone(880, 0.09, 0.2, 'sine', 0.1); },
+    close()    { tone(880, 0, 0.12, 'sine', 0.09); tone(587.33, 0.08, 0.18, 'sine', 0.09); },
+    ding()     { tone(1046.5, 0, 0.5, 'sine', 0.1); },
+    shutdown() { [783.99, 659.25, 523.25, 392].forEach((f, i) => tone(f, i * 0.28, 1.2, 'triangle', 0.1));
+                 [392, 493.88, 587.33].forEach(f => tone(f, 1.1, 2.2, 'sine', 0.06)); }
+  };
+  document.addEventListener('pointerdown', e => {
+    if (e.target.closest('button,.sm-item,.fi,.task')) sfx.click();
+  });
+  $('#spk').addEventListener('click', () => {
+    muted = !muted;
+    $('#spk').textContent = muted ? '🔇' : '🔊';
+    if (!muted) sfx.ding();
+  });
+
+  /* ---------- wallpaper: fixed virtual size, scaled to fit ---------- */
+  const wall = $('#wall');
+  let visits = 1337;
+  try { visits = parseInt(localStorage.getItem('sham_visits') || '1336', 10) + 1; localStorage.setItem('sham_visits', visits); } catch (e) {}
+  const now = new Date();
+  wall.srcdoc = $('#wallsrc').textContent
+    .replace(/{{DATE}}/g, now.toLocaleDateString())
+    .replace(/{{YEAR}}/g, now.getFullYear())
+    .replace(/{{COUNT}}/g, String(visits).padStart(6, '0'));
+  function fitWall() {
+    const W = innerWidth, H = innerHeight - 34;
+    const vw = W >= 1100 ? 1100 : Math.max(W, 700);
+    const s = W / vw;
+    wall.style.width = vw + 'px';
+    wall.style.height = (H / s) + 'px';
+    wall.style.transform = 'scale(' + s + ')';
+  }
+  fitWall(); addEventListener('resize', fitWall);
+
+  /* ---------- windows ---------- */
   const tasks = $('#tasks'), startBtn = $('#start-btn'), startMenu = $('#start-menu');
   const apps = {};
   let z = 10, active = null;
 
-  /* ---- custom dog cursor (original artwork, drawn as SVG) ---- */
-  const dogHead = happy => `
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-      <path d="M5 6Q0 12 3 21Q8 19 9.5 10Z" fill="#4b3a2e" stroke="#000"/>
-      <path d="M27 6Q32 12 29 21Q24 19 22.5 10Z" fill="#4b3a2e" stroke="#000"/>
-      <ellipse cx="16" cy="15" rx="10" ry="10" fill="#fff" stroke="#000"/>
-      <circle cx="11.5" cy="12.5" r="3.2" fill="#9c7a58"/>
-      ${happy
-        ? '<path d="M9.8 13Q11.5 10.8 13.2 13M18.8 13Q20.5 10.8 22.2 13" stroke="#000" fill="none" stroke-width="1.4"/>'
-        : '<circle cx="11.5" cy="12.5" r="1.5" fill="#000"/><circle cx="20.5" cy="12.5" r="1.5" fill="#000"/>'}
-      <ellipse cx="16" cy="21" rx="5" ry="3.8" fill="#f1dcc0" stroke="#000"/>
-      <ellipse cx="16" cy="19.4" rx="2.2" ry="1.5" fill="#000"/>
-      <path d="M16 20.5V22.5M13.5 22.5Q16 24.5 18.5 22.5" stroke="#000" fill="none"/>
-      ${happy ? '<path d="M14.6 23.6Q16 29 17.4 23.6Z" fill="#ff6b8a" stroke="#000" stroke-width=".8"/>' : ''}
-    </svg>`;
-  // To use your own cursor art instead, replace the data URL with url("your-cursor.png") and keep the "16 19" hotspot.
-  const cur = (svg) => `url("data:image/svg+xml,${encodeURIComponent(svg)}") 16 19`;
-  const cs = document.createElement('style');
-  cs.textContent =
-    `*{cursor:${cur(dogHead(false))},default}` +
-    `a,button,.task,#start-menu li,label{cursor:${cur(dogHead(true))},pointer}` +
-    `input[type=text],textarea{cursor:${cur(dogHead(false))},text}`;
-  document.head.appendChild(cs);
-
-  /* ---- build window chrome ---- */
-  $$('.window').forEach(win => {
-    const id = win.id.replace('win-', '');
+  $$('section.window').forEach(win => {
+    const id = win.dataset.app;
     const content = document.createElement('div');
-    content.className = 'content';
+    content.className = 'content' + (win.dataset.flush ? ' flush' : '');
     while (win.firstChild) content.appendChild(win.firstChild);
 
     const bar = document.createElement('div');
     bar.className = 'titlebar';
     bar.innerHTML =
-      `<span>${win.dataset.icon}</span><span class="ttext">${win.dataset.title}</span>` +
-      `<span class="tbtns"><button class="min" title="Minimize">_</button>` +
-      `<button class="max" title="Maximize">▢</button>` +
-      `<button class="close" title="Close">✕</button></span>`;
+      '<span>' + win.dataset.icon + '</span><span class="ttext">' + win.dataset.title + '</span>' +
+      '<span class="tbtns"><button class="min" title="Minimize">_</button>' +
+      '<button class="max" title="Maximize">▢</button>' +
+      '<button class="close" title="Close">✕</button></span>';
     win.append(bar, content);
 
     apps[id] = { win, btn: null, icon: win.dataset.icon, tab: win.dataset.tab || win.dataset.title };
@@ -360,11 +457,8 @@
     $('.min', bar).addEventListener('click', () => minimize(id));
     $('.max', bar).addEventListener('click', () => win.classList.toggle('maxed'));
     $('.close', bar).addEventListener('click', () => closeApp(id));
-    bar.addEventListener('dblclick', e => {
-      if (!e.target.closest('button')) win.classList.toggle('maxed');
-    });
+    bar.addEventListener('dblclick', e => { if (!e.target.closest('button')) win.classList.toggle('maxed'); });
 
-    /* dragging */
     bar.addEventListener('pointerdown', e => {
       if (e.target.closest('button') || win.classList.contains('maxed')) return;
       const r = win.getBoundingClientRect();
@@ -372,7 +466,7 @@
       bar.setPointerCapture(e.pointerId);
       const move = ev => {
         win.style.left = Math.min(Math.max(ev.clientX - dx, 80 - r.width), innerWidth - 80) + 'px';
-        win.style.top  = Math.min(Math.max(ev.clientY - dy, 0), innerHeight - 54) + 'px';
+        win.style.top  = Math.min(Math.max(ev.clientY - dy, 0), innerHeight - 64) + 'px';
       };
       const up = () => {
         bar.removeEventListener('pointermove', move);
@@ -385,10 +479,9 @@
     });
   });
 
-  /* ---- tabs + window management ---- */
   function refresh() {
-    $$('.window').forEach(w => w.classList.toggle('active', !!active && w === apps[active].win));
     Object.entries(apps).forEach(([id, a]) => {
+      a.win.classList.toggle('active', id === active);
       if (a.btn) a.btn.classList.toggle('pressed', id === active && a.win.classList.contains('show'));
     });
   }
@@ -397,15 +490,22 @@
     if (a.btn) return;
     a.btn = document.createElement('button');
     a.btn.className = 'task';
-    a.btn.textContent = `${a.icon} ${a.tab}`;
+    a.btn.textContent = a.icon + ' ' + a.tab;
     a.btn.addEventListener('click', () => {
       if (a.win.classList.contains('show') && active === id) minimize(id);
-      else openApp(id);
+      else openApp(id, true);
     });
     tasks.appendChild(a.btn);
   }
   function focusApp(id) { active = id; apps[id].win.style.zIndex = ++z; refresh(); }
-  function openApp(id) { addTab(id); apps[id].win.classList.add('show'); focusApp(id); }
+  function openApp(id, quiet) {
+    const a = apps[id];
+    const wasOpen = a.win.classList.contains('show');
+    addTab(id);
+    a.win.classList.add('show');
+    focusApp(id);
+    if (!wasOpen && !quiet) sfx.open();
+  }
   function minimize(id) {
     apps[id].win.classList.remove('show');
     if (active === id) active = null;
@@ -417,91 +517,151 @@
     if (a.btn) { a.btn.remove(); a.btn = null; }
     if (active === id) active = null;
     refresh();
+    sfx.close();
   }
 
-  /* every app starts as an open tab in the taskbar */
-  Object.keys(apps).forEach(addTab);
-
-  /* ---- start menu ---- */
-  const closeMenu = () => { startMenu.classList.remove('show'); startBtn.classList.remove('down'); };
-  startBtn.addEventListener('click', () => {
-    startMenu.classList.toggle('show');
-    startBtn.classList.toggle('down');
+  /* ---------- folder: Social Media Links ---------- */
+  const grid = $('#socgrid');
+  SOCIALS.forEach(s => {
+    const b = document.createElement('button');
+    b.className = 'fi';
+    b.innerHTML = '<span class="g">' + s.icon + '</span><span class="l">' + esc(s.name) + '</span>';
+    b.addEventListener('click', e => {
+      e.stopPropagation();
+      $$('.fi', grid).forEach(x => x.classList.remove('sel'));
+      b.classList.add('sel');
+      if (coarse) openUrl(s.url);
+    });
+    b.addEventListener('dblclick', () => openUrl(s.url));
+    b.addEventListener('keydown', e => { if (e.key === 'Enter') openUrl(s.url); });
+    grid.appendChild(b);
   });
+  grid.addEventListener('click', () => $$('.fi', grid).forEach(x => x.classList.remove('sel')));
+  $('#sstatus').textContent = SOCIALS.length + ' object(s)  ·  double-click to open';
+
+  /* ---------- start menu + search ---------- */
+  const ITEMS = [
+    { name: 'About Me',           icon: '👤', kw: 'bio profile who',          side: 'left', run: () => openApp('about') },
+    { name: 'Email Me',           icon: '✉️', kw: 'contact mail message',     side: 'left', run: () => openApp('email') },
+    { name: 'Resume',             icon: '📄', kw: 'cv pdf hire curriculum',   side: 'left', run: () => openUrl(RESUME_URL) },
+    { name: 'Social Media Links', icon: '📁', kw: 'folder socials accounts',  side: 'left', run: () => openApp('social') },
+    // WEBRING ITEM GOES HERE LATER
+    ...SOCIALS.map(s => ({ name: s.name, icon: s.icon, kw: 'social ' + (s.kw || ''), side: s.pin ? 'right' : null, run: () => openUrl(s.url) }))
+  ];
+
+  const q = $('#q'), pinned = $('#pinned'), results = $('#results'), quick = $('#quick');
+  let shown = [], sel = 0;
+
+  function row(it) {
+    const d = document.createElement('div');
+    d.className = 'sm-item';
+    d.innerHTML = '<span class="mi">' + it.icon + '</span><span>' + esc(it.name) + '</span>';
+    d.addEventListener('click', () => runItem(it));
+    return d;
+  }
+  ITEMS.filter(i => i.side === 'left').forEach(i => pinned.appendChild(row(i)));
+  quick.innerHTML = '<div class="sm-sub">Quick links</div>';
+  ITEMS.filter(i => i.side === 'right').forEach(i => quick.appendChild(row(i)));
+
+  function renderSearch() {
+    const t = q.value.trim().toLowerCase();
+    if (!t) { results.hidden = true; pinned.hidden = false; return; }
+    shown = ITEMS.filter(it => (it.name + ' ' + it.kw).toLowerCase().includes(t)).slice(0, 8);
+    sel = 0;
+    pinned.hidden = true; results.hidden = false;
+    results.innerHTML = '';
+    if (!shown.length) {
+      results.innerHTML = '<div class="sm-empty">No results found for "' + esc(q.value.trim()) + '"</div>';
+      return;
+    }
+    results.insertAdjacentHTML('beforeend', '<div class="sm-sub">Search results</div>');
+    shown.forEach((it, i) => { const r = row(it); if (i === 0) r.classList.add('on'); results.appendChild(r); });
+  }
+  function moveSel(d) {
+    if (!shown.length) return;
+    const rows = $$('.sm-item', results);
+    rows[sel].classList.remove('on');
+    sel = (sel + d + shown.length) % shown.length;
+    rows[sel].classList.add('on');
+  }
+  q.addEventListener('input', renderSearch);
+  q.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); moveSel(1); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); moveSel(-1); }
+    else if (e.key === 'Enter' && shown[sel] && !results.hidden) runItem(shown[sel]);
+    else if (e.key === 'Escape') closeMenu();
+  });
+
+  function runItem(it) { closeMenu(); it.run(); }
+  function openMenu() {
+    q.value = ''; renderSearch();
+    startMenu.classList.add('show'); startBtn.classList.add('down');
+    if (!coarse) q.focus({ preventScroll: true });
+  }
+  function closeMenu() { startMenu.classList.remove('show'); startBtn.classList.remove('down'); }
+  startBtn.addEventListener('click', () => startMenu.classList.contains('show') ? closeMenu() : openMenu());
   document.addEventListener('pointerdown', e => {
     if (!startMenu.contains(e.target) && !startBtn.contains(e.target)) closeMenu();
   });
-  startMenu.addEventListener('click', e => {
-    const li = e.target.closest('li');
-    if (!li) return;
-    closeMenu();
-    if (li.dataset.app) openApp(li.dataset.app);
-    else if (li.dataset.href) window.open(li.dataset.href, '_blank', 'noopener');
-    else if (li.dataset.action === 'shutdown') $('#dialog').classList.add('show');
-  });
 
-  /* ---- shut down ---- */
-  const sd = $('#shutdown');
-  $('#no').addEventListener('click', () => $('#dialog').classList.remove('show'));
-  $('#yes').addEventListener('click', () => {
-    $('#dialog').classList.remove('show');
-    sd.className = 'show stage1';
-    sd.textContent = 'Windows is shutting down...';
+  /* ---------- turn off / restart ---------- */
+  const dialog = $('#dialog'), sd = $('#shutdown');
+  $('#off').addEventListener('click', () => { closeMenu(); dialog.classList.add('show'); });
+  $('#d-cancel').addEventListener('click', () => dialog.classList.remove('show'));
+  $('#d-restart').addEventListener('click', () => location.reload());
+  $('#d-off').addEventListener('click', () => {
+    dialog.classList.remove('show');
+    sfx.shutdown();
+    sd.className = 'show s1';
+    sd.textContent = 'Saving your settings...';
     setTimeout(() => {
-      sd.className = 'show stage2';
-      sd.innerHTML = "It's now safe to turn off<br>your computer.<br><br><small>(click anywhere to restart)</small>";
-      try { window.close(); } catch (e) {}   // only works in some browsers/situations; otherwise this screen stays
-    }, 1800);
+      sd.className = 'show s2';
+      sd.innerHTML = "It's now safe to turn off<br>your computer.<br><br><small>(click anywhere to power back on)</small>";
+      try { window.close(); } catch (e) {}   // only works in some browsers; otherwise this screen stays
+    }, 2800);
   });
-  sd.addEventListener('click', () => { if (sd.classList.contains('stage2')) sd.className = ''; });
+  sd.addEventListener('click', () => { if (sd.classList.contains('s2')) location.reload(); });
 
-  /* ---- clock ---- */
-  const tick = () => {
-    $('#clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-  };
+  /* ---------- tray clock ---------- */
+  const tick = () => { $('#clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
   tick(); setInterval(tick, 10000);
 
-  /* ---- calendar widget ---- */
-  (() => {
-    const now = new Date(), y = now.getFullYear(), m = now.getMonth();
-    const first = new Date(y, m, 1).getDay(), days = new Date(y, m + 1, 0).getDate();
-    let h = `<div class="calhead">${now.toLocaleString([], { month: 'long' })} ${y}</div><table><tr>` +
-            [...'SMTWTFS'].map(d => `<th>${d}</th>`).join('') + '</tr><tr>';
-    for (let i = 0; i < first; i++) h += '<td></td>';
-    for (let d = 1; d <= days; d++) {
-      if ((first + d - 1) % 7 === 0 && d > 1) h += '</tr><tr>';
-      h += `<td class="${d === now.getDate() ? 'today' : ''}">${d}</td>`;
-    }
-    $('#cal').innerHTML = h + '</tr></table>';
-  })();
-
-  /* ---- typewriter tagline ---- */
-  (() => {
-    const lines = [
-      'Welcome to my corner of the internet.',
-      'Click a tab below to look around.',
-      'Currently: [what you\'re up to]',
-      'Thanks for stopping by!'
-    ];
-    const el = $('#type');
-    let li = 0, ci = 0, del = false;
-    (function step() {
-      const t = lines[li];
-      el.textContent = t.slice(0, ci);
-      if (!del && ci < t.length) { ci++; setTimeout(step, 70); }
-      else if (!del)             { del = true; setTimeout(step, 1600); }
-      else if (ci > 0)           { ci--; setTimeout(step, 30); }
-      else                       { del = false; li = (li + 1) % lines.length; setTimeout(step, 300); }
-    })();
-  })();
-
-  /* ---- email window ---- */
+  /* ---------- email window ---------- */
   $('#to').value = EMAIL;
   $('#send').addEventListener('click', () => {
     const s = encodeURIComponent($('#subj').value || 'Hello from your website');
     const b = encodeURIComponent($('#msg').value);
-    location.href = `mailto:${EMAIL}?subject=${s}&body=${b}`;
+    location.href = 'mailto:' + EMAIL + '?subject=' + s + '&body=' + b;
   });
+
+  /* ---------- boot sequence: power -> boot -> welcome -> desktop ---------- */
+  const power = $('#power'), boot = $('#boot'), welcome = $('#welcome'), os = $('#os');
+  let stage = 0, timer = null;
+
+  function powerOn() {
+    if (stage !== 0) return;
+    stage = 1; initAudio();
+    power.classList.remove('show'); boot.classList.add('show');
+    timer = setTimeout(showWelcome, 3800);
+  }
+  function showWelcome() {
+    if (stage !== 1) return;
+    stage = 2; clearTimeout(timer);
+    boot.classList.remove('show'); welcome.classList.add('show');
+    timer = setTimeout(finishBoot, 2400);
+  }
+  function finishBoot() {
+    if (stage !== 2) return;
+    stage = 3; clearTimeout(timer);
+    welcome.classList.remove('show');
+    os.classList.add('on');
+    sfx.startup();
+  }
+  power.addEventListener('click', powerOn);
+  boot.addEventListener('click', showWelcome);
+  welcome.addEventListener('click', finishBoot);
+  document.addEventListener('keydown', e => { if (stage === 0 && (e.key === 'Enter' || e.key === ' ')) powerOn(); });
+  power.focus();
 })();
 </script>
 </body>
