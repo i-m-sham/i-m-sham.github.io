@@ -38,6 +38,7 @@
   #os{position:fixed;inset:0;opacity:0;visibility:hidden}
   #os.on{opacity:1;visibility:visible;transition:opacity 1s}
   #wallpaper{position:fixed;inset:0 0 34px 0;overflow:hidden;background:#000033;z-index:0}
+  #wallpaper.hand{cursor:pointer}
   #wall{position:absolute;left:0;top:0;border:0;pointer-events:none;transform-origin:0 0;background:#000033}
 
   /* ================= WINDOW FRAMES (XP-style) ================= */
@@ -122,11 +123,20 @@
   .sm-off:hover{background:rgba(255,255,255,.2)}
   .sm-off i{font-style:normal;background:#d1481f;border:1px solid #fff;border-radius:3px;padding:0 4px}
 
-  /* ================= DIALOG + SHUTDOWN ================= */
+  /* ================= DIALOGS + SHUTDOWN ================= */
   #dialog{display:none;position:fixed;inset:0;z-index:150000;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,.4)}
   #dialog.show{display:flex}
   #dialog .frame{width:380px;max-width:100%}
   #dialog .btns{display:flex;justify-content:center;gap:10px;margin-top:14px}
+
+  /* "you clicked the wallpaper" box: lets clicks pass through everywhere except the box itself */
+  #nag{display:none;position:fixed;inset:0 0 34px 0;z-index:160000;align-items:center;justify-content:center;padding:12px;pointer-events:none}
+  #nag.show{display:flex}
+  #nag .frame{width:340px;max-width:100%;pointer-events:auto}
+  #nag .btns{display:flex;justify-content:center;margin-top:12px}
+  @keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+  #nag .frame.shake{animation:shake .25s 2}
+
   #shutdown{display:none;position:fixed;inset:0;z-index:500000;text-align:center;align-items:center;justify-content:center;padding:20px;cursor:pointer}
   #shutdown.show{display:flex}
   #shutdown.s1{background:#3a60d4;color:#fff;font:italic 28px "Trebuchet MS",Arial,sans-serif;text-shadow:2px 2px #00309c;cursor:default}
@@ -164,9 +174,9 @@
 <!-- ============ THE "OPERATING SYSTEM" ============ -->
 <div id="os">
 
-  <!-- Desktop wallpaper: a 2000s website you can see but never touch -->
+  <!-- Desktop wallpaper: a 2000s website you can see but never use -->
   <div id="wallpaper">
-    <iframe id="wall" title="Desktop wallpaper" aria-hidden="true" tabindex="-1" sandbox="" scrolling="no"></iframe>
+    <iframe id="wall" title="Desktop wallpaper" aria-hidden="true" tabindex="-1" sandbox="allow-same-origin" scrolling="no"></iframe>
   </div>
 
   <!-- ========== APPS (windows). Copy the pattern to add more. ========== -->
@@ -187,6 +197,11 @@
       </table>
       <p style="margin-top:10px">[Write a few sentences about yourself here.]</p>
     </div>
+  </section>
+
+  <section class="frame window" data-app="news" data-title="What's New" data-tab="What's New" data-icon="📰" style="left:170px;top:60px;width:430px">
+    <h2>What's New</h2>
+    <div class="paper" id="newslist"></div>
   </section>
 
   <section class="frame window" data-app="email" data-title="New Message" data-tab="Email Me" data-icon="✉️" style="left:200px;top:70px;width:420px">
@@ -228,6 +243,23 @@
     <div class="sm-foot"><button class="sm-off" id="off"><i>⏻</i> Turn Off</button></div>
   </div>
 
+  <!-- ========== "ARE YOU CLICKING A WALLPAPER?" DIALOG ========== -->
+  <div id="nag" role="alertdialog" aria-labelledby="nag-t" aria-describedby="nag-m">
+    <div class="frame active">
+      <div class="titlebar">
+        <span>🖥️</span><span class="ttext" id="nag-t">Sham OS</span>
+        <span class="tbtns"><button class="close" id="nag-x" title="Close">✕</button></span>
+      </div>
+      <div class="content" style="flex:none">
+        <div class="row" style="align-items:center">
+          <div class="big">ℹ️</div>
+          <p id="nag-m" style="margin:0">Are you really trying to click on a wallpaper? Start with the start button :D</p>
+        </div>
+        <div class="btns"><button class="btn" id="nag-ok">OK</button></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== TURN OFF DIALOG ========== -->
   <div id="dialog">
     <div class="frame active">
@@ -252,7 +284,7 @@
 <!-- =====================================================================
      THE WALLPAPER SITE (a 2000s homepage rendered inside a locked iframe).
      Edit the text freely. {{DATE}}, {{YEAR}}, {{COUNT}} are filled in by script.
-     The "Webring" box is where your webring will go.
+     Keep it short: whatever doesn't fit goes in the start menu instead.
      ===================================================================== -->
 <script type="text/html" id="wallsrc">
 <!DOCTYPE html>
@@ -263,7 +295,7 @@
     background-size:40px 40px,70px 70px;background-position:0 0,20px 30px;color:#00ff66;
     font:14px/1.35 "Comic Sans MS","Comic Sans",cursive;text-align:center}
   .top{background:#ff00ff;color:#ffff00;font-weight:bold;padding:3px}
-  h1{margin:10px 0 2px;font-size:46px;background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet);
+  h1{margin:8px 0 2px;font-size:44px;background:linear-gradient(90deg,red,orange,yellow,lime,cyan,blue,violet);
     -webkit-background-clip:text;background-clip:text;color:transparent}
   .blink{animation:b 1s steps(2,start) infinite;color:#ffcc00;font-weight:bold}
   @keyframes b{to{visibility:hidden}}
@@ -275,11 +307,10 @@
   .bar{height:10px;background:#333;border:1px solid #fff;margin:2px 0 6px}
   .bar i{display:block;height:100%;background:linear-gradient(90deg,#0f0,#ff0)}
   .count{display:inline-block;background:#000;color:#f00;font:bold 18px "Courier New",monospace;letter-spacing:4px;padding:3px 8px;border:2px inset #888}
-  .badge{display:inline-block;width:88px;height:31px;line-height:12px;padding-top:4px;border:1px solid #fff;background:#444;color:#fff;font:10px Verdana,sans-serif;text-align:center;margin:2px}
+  .badge{display:inline-block;width:88px;height:31px;line-height:12px;padding-top:4px;border:1px solid #fff;background:#444;color:#fff;text-decoration:none;font:10px Verdana,sans-serif;text-align:center;margin:2px}
   .dash{border-style:dashed;border-color:#ff66ff;text-align:center}
-  .news b{color:#ff9900}
   ul{margin:0;padding-left:20px}
-  .foot{text-align:center;font-size:12px;color:#aaa;padding:2px 0 8px}
+  .foot{position:absolute;left:0;right:0;bottom:0;text-align:center;font-size:12px;color:#aaa;padding:3px 0 6px;background:rgba(0,0,51,.75)}
   @media (max-width:899px){.cols{grid-template-columns:1fr 1fr}.side2{display:none}}
 </style></head>
 <body>
@@ -291,13 +322,13 @@
     <div class="side">
       <div class="box">
         <h3>Menu</h3>
-        <span class="lnk">Home</span><span class="lnk">About Me</span><span class="lnk">My Projects</span>
-        <span class="lnk">Photos</span><span class="lnk">Cool Links</span><span class="lnk">Guestbook</span>
+        <a class="lnk" href="#">Home</a><a class="lnk" href="#">About Me</a><a class="lnk" href="#">My Projects</a>
+        <a class="lnk" href="#">Photos</a><a class="lnk" href="#">Cool Links</a><a class="lnk" href="#">Guestbook</a>
       </div>
       <div class="box" style="text-align:center">
         <p>You are visitor number</p>
         <div class="count">{{COUNT}}</div>
-        <p style="margin-top:8px"><span class="badge">Made with<br>Notepad</span><span class="badge">Get Netscape<br>Now!</span></p>
+        <p style="margin-top:8px"><a class="badge" href="#">Made with<br>Notepad</a><a class="badge" href="#">Get Netscape<br>Now!</a></p>
       </div>
     </div>
 
@@ -314,12 +345,6 @@
         <div class="bar"><i style="width:90%"></i></div>
         <div class="bar"><i style="width:70%"></i></div>
         <div class="bar"><i style="width:55%"></i></div>
-      </div>
-      <div class="box news">
-        <h3>What's New</h3>
-        <p><b>{{DATE}}</b> - Rebuilt the whole site as a computer!</p>
-        <p><b>[date]</b> - [something you shipped or learned]</p>
-        <p><b>[date]</b> - Webring coming soon!!</p>
       </div>
     </div>
 
@@ -355,6 +380,11 @@
     { name: 'Twitter / X', icon: '🐦', url: 'https://x.com/your-handle',                      kw: 'tweets x' },
     { name: 'Instagram',   icon: '📷', url: 'https://instagram.com/your-handle',               kw: 'photos insta' },
   ];
+  const NEWS = [   // shown in Start > What's New
+    { date: '31 Oct 2026', text: 'Rebuilt the whole site as a computer!' },
+    { date: '[date]',      text: '[something you shipped or learned]' },
+    { date: '[date]',      text: 'Webring coming soon!!' },
+  ];
   /* ============================================================== */
 
   const $  = (s, r = document) => r.querySelector(s);
@@ -379,7 +409,7 @@
     if (!AC) return;
     actx = new AC();
     master = actx.createGain(); master.gain.value = 0.8; master.connect(actx.destination);
-    const d = actx.createDelay(1); d.delayTime.value = 0.23;       // soft echo for the shimmer
+    const d = actx.createDelay(1); d.delayTime.value = 0.23;
     const fb = actx.createGain(); fb.gain.value = 0.38;
     const wet = actx.createGain(); wet.gain.value = 0.35;
     master.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(actx.destination);
@@ -400,6 +430,7 @@
     open()     { tone(660, 0, 0.14, 'sine', 0.1); tone(880, 0.09, 0.2, 'sine', 0.1); },
     close()    { tone(880, 0, 0.12, 'sine', 0.09); tone(587.33, 0.08, 0.18, 'sine', 0.09); },
     ding()     { tone(1046.5, 0, 0.5, 'sine', 0.1); },
+    nope()     { tone(523.25, 0, 0.14, 'triangle', 0.1); tone(392, 0.12, 0.28, 'triangle', 0.1); },
     shutdown() { [783.99, 659.25, 523.25, 392].forEach((f, i) => tone(f, i * 0.28, 1.2, 'triangle', 0.1));
                  [392, 493.88, 587.33].forEach(f => tone(f, 1.1, 2.2, 'sine', 0.06)); }
   };
@@ -412,8 +443,8 @@
     if (!muted) sfx.ding();
   });
 
-  /* ---------- wallpaper: fixed virtual size, scaled to fit ---------- */
-  const wall = $('#wall');
+  /* ---------- wallpaper: scaled so ALL of it fits above the taskbar ---------- */
+  const wall = $('#wall'), wp = $('#wallpaper');
   let visits = 1337;
   try { visits = parseInt(localStorage.getItem('sham_visits') || '1336', 10) + 1; localStorage.setItem('sham_visits', visits); } catch (e) {}
   const now = new Date();
@@ -422,14 +453,42 @@
     .replace(/{{YEAR}}/g, now.getFullYear())
     .replace(/{{COUNT}}/g, String(visits).padStart(6, '0'));
   function fitWall() {
-    const W = innerWidth, H = innerHeight - 34;
-    const vw = W >= 1100 ? 1100 : Math.max(W, 700);
-    const s = W / vw;
-    wall.style.width = vw + 'px';
+    const W = innerWidth, H = innerHeight - 34;            // area above the taskbar
+    const DW = W >= 1100 ? 1100 : Math.max(W, 700);        // design width of the page
+    const DH = 600;                                        // design height: the page always fits in this
+    const s = Math.min(W / DW, H / DH);                    // never scale so big that the bottom gets cut off
+    wall.style.width = (W / s) + 'px';
     wall.style.height = (H / s) + 'px';
     wall.style.transform = 'scale(' + s + ')';
   }
   fitWall(); addEventListener('resize', fitWall);
+
+  /* ---------- "you can't click a wallpaper" dialog ---------- */
+  const nag = $('#nag'), nagFrame = $('#nag .frame');
+  function linkAt(e) {
+    try {
+      const doc = wall.contentDocument;
+      if (!doc) return false;
+      const r = wall.getBoundingClientRect();
+      const k = r.width / wall.offsetWidth || 1;           // current scale
+      const el = doc.elementFromPoint((e.clientX - r.left) / k, (e.clientY - r.top) / k);
+      return !!(el && el.closest('a'));
+    } catch (err) { return false; }
+  }
+  function showNag() {
+    const again = nag.classList.contains('show');
+    nag.classList.add('show');
+    if (again) { nagFrame.classList.remove('shake'); void nagFrame.offsetWidth; nagFrame.classList.add('shake'); }
+    sfx.nope();
+    if (!coarse) $('#nag-ok').focus({ preventScroll: true });
+  }
+  function hideNag() { nag.classList.remove('show'); nagFrame.classList.remove('shake'); }
+  wp.addEventListener('mousemove', e => wp.classList.toggle('hand', linkAt(e)));
+  wp.addEventListener('mouseleave', () => wp.classList.remove('hand'));
+  wp.addEventListener('click', e => { if (linkAt(e)) showNag(); });
+  $('#nag-ok').addEventListener('click', hideNag);
+  $('#nag-x').addEventListener('click', hideNag);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && nag.classList.contains('show')) hideNag(); });
 
   /* ---------- windows ---------- */
   const tasks = $('#tasks'), startBtn = $('#start-btn'), startMenu = $('#start-menu');
@@ -520,6 +579,9 @@
     sfx.close();
   }
 
+  /* ---------- What's New window ---------- */
+  $('#newslist').innerHTML = NEWS.map(n => '<p><b>' + esc(n.date) + '</b> - ' + esc(n.text) + '</p>').join('');
+
   /* ---------- folder: Social Media Links ---------- */
   const grid = $('#socgrid');
   SOCIALS.forEach(s => {
@@ -541,10 +603,11 @@
 
   /* ---------- start menu + search ---------- */
   const ITEMS = [
-    { name: 'About Me',           icon: '👤', kw: 'bio profile who',          side: 'left', run: () => openApp('about') },
-    { name: 'Email Me',           icon: '✉️', kw: 'contact mail message',     side: 'left', run: () => openApp('email') },
-    { name: 'Resume',             icon: '📄', kw: 'cv pdf hire curriculum',   side: 'left', run: () => openUrl(RESUME_URL) },
-    { name: 'Social Media Links', icon: '📁', kw: 'folder socials accounts',  side: 'left', run: () => openApp('social') },
+    { name: 'About Me',           icon: '👤', kw: 'bio profile who',               side: 'left', run: () => openApp('about') },
+    { name: "What's New",         icon: '📰', kw: 'news updates changelog latest', side: 'left', run: () => openApp('news') },
+    { name: 'Email Me',           icon: '✉️', kw: 'contact mail message',          side: 'left', run: () => openApp('email') },
+    { name: 'Resume',             icon: '📄', kw: 'cv pdf hire curriculum',        side: 'left', run: () => openUrl(RESUME_URL) },
+    { name: 'Social Media Links', icon: '📁', kw: 'folder socials accounts',       side: 'left', run: () => openApp('social') },
     // WEBRING ITEM GOES HERE LATER
     ...SOCIALS.map(s => ({ name: s.name, icon: s.icon, kw: 'social ' + (s.kw || ''), side: s.pin ? 'right' : null, run: () => openUrl(s.url) }))
   ];
@@ -594,6 +657,7 @@
 
   function runItem(it) { closeMenu(); it.run(); }
   function openMenu() {
+    hideNag();                                   // the dialog told them to use start, so they did
     q.value = ''; renderSearch();
     startMenu.classList.add('show'); startBtn.classList.add('down');
     if (!coarse) q.focus({ preventScroll: true });
@@ -611,6 +675,7 @@
   $('#d-restart').addEventListener('click', () => location.reload());
   $('#d-off').addEventListener('click', () => {
     dialog.classList.remove('show');
+    hideNag();
     sfx.shutdown();
     sd.className = 'show s1';
     sd.textContent = 'Saving your settings...';
