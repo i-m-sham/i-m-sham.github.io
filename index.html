@@ -499,13 +499,32 @@
 
   /* ---------- wallpaper: scaled so ALL of it fits above the taskbar ---------- */
   const wall = $('#wall'), wp = $('#wallpaper');
-  let visits = 1337;
-  try { visits = parseInt(localStorage.getItem('sham_visits') || '1336', 10) + 1; localStorage.setItem('sham_visits', visits); } catch (e) {}
+  const COUNTER_URL = 'https://abacus.jasoncameron.dev/hit/i-m-sham.github.io/visits';
+  let countText = '......';
+  function paintCount() {
+    try { const el = wall.contentDocument.querySelector('.count'); if (el) el.textContent = countText; } catch (e) {}
+  }
+  wall.addEventListener('load', paintCount);
   const now = new Date();
   wall.srcdoc = $('#wallsrc').textContent
     .replace(/{{DATE}}/g, now.toLocaleDateString())
     .replace(/{{YEAR}}/g, now.getFullYear())
-    .replace(/{{COUNT}}/g, String(visits).padStart(6, '0'));
+    .replace(/{{COUNT}}/g, countText);
+  async function loadCount() {
+    let n = null;
+    try { n = sessionStorage.getItem('sham_count'); } catch (e) {}
+    if (!n) {
+      try {
+        const res = await fetch(COUNTER_URL);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        n = (await res.json()).value;
+        try { sessionStorage.setItem('sham_count', n); } catch (e) {}
+      } catch (e) { n = null; }
+    }
+    countText = n ? String(n).padStart(6, '0') : '------';
+    paintCount();
+  }
+  loadCount();
   function fitWall() {
     const W = innerWidth, H = innerHeight - 34;            // area above the taskbar
     const DW = W >= 1100 ? 1100 : Math.max(W, 700);        // design width of the page
