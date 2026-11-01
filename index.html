@@ -431,10 +431,8 @@
     { name: 'GitHub',   icon: '🐙', url: 'https://github.com/i-m-sham',                            pin: true, kw: 'git code repos' },
     { name: 'LinkedIn', icon: '💼', url: 'https://www.linkedin.com/in/shamant-marathe-9b88a4323', pin: true, kw: 'work career jobs' },
   ];
-  const BLOG_URL = 'https://i-m-sham.mataroa.blog/';        // opened by the "Visit my blog" button
-  const FEED_URL = 'https://i-m-sham.mataroa.blog/rss/';    // RSS/Atom feed the post list is built from
-  const MAX_POSTS = 8;
-  const BLOG = [];   // optional fallback shown if the feed can't be loaded. Example:
+  const BLOG_URL = 'https://i-m-sham.mataroa.blog/';   // opened by the "Visit my blog" button
+  const BLOG = [];   // optional fallback shown if posts.json can't be loaded. Example:
                      // { date: '1 Nov 2026', title: 'Post title', url: 'https://...', summary: 'One sentence.' }
   const NEWS = [   // shown in Start > What's New
     { date: '31 Oct 2026', text: 'Rebuilt the whole site as a computer!' },
@@ -653,9 +651,8 @@
   /* ---------- What's New window ---------- */
   $('#newslist').innerHTML = NEWS.map(n => '<p><b>' + esc(n.date) + '</b> - ' + esc(n.text) + '</p>').join('');
 
-  /* ---------- Blog window (loads from RSS/Atom, falls back to the BLOG list) ---------- */
+  /* ---------- Blog window (reads posts.json, which a GitHub Action keeps up to date) ---------- */
   const safeUrl = u => /^https?:\/\//i.test(u) ? u : '#';
-  const plain = h => (new DOMParser().parseFromString(h || '', 'text/html').body.textContent || '').trim();
 
   function renderPosts(list, failed) {
     $('#bloglist').innerHTML = list.length
@@ -668,29 +665,13 @@
   async function loadBlog() {
     $('#bloglist').innerHTML = '<p>Loading posts...</p>';
     try {
-      const res = await fetch(FEED_URL);
+      const res = await fetch('posts.json', { cache: 'no-cache' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-      if (xml.querySelector('parsererror')) throw new Error('not valid XML');
-      const txt = (el, sel) => { const n = el.querySelector(sel); return n ? n.textContent.trim() : ''; };
-
-      const posts = [...xml.querySelectorAll('item, entry')].slice(0, MAX_POSTS).map(el => {
-        const atom = el.querySelector('link[rel="alternate"][href]') || el.querySelector('link[href]');
-        const raw = txt(el, 'pubDate') || txt(el, 'published') || txt(el, 'updated');
-        const d = new Date(raw);
-        const text = plain(txt(el, 'description') || txt(el, 'summary') || txt(el, 'content'));
-        return {
-          title: txt(el, 'title') || 'Untitled',
-          url: atom ? atom.getAttribute('href') : txt(el, 'link'),
-          date: isNaN(d) ? raw : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }),
-          summary: text.length > 140 ? text.slice(0, 140) + '…' : text
-        };
-      });
-
-      if (!posts.length) throw new Error('no posts in feed');
+      const posts = await res.json();
+      if (!Array.isArray(posts) || !posts.length) throw new Error('no posts');
       renderPosts(posts);
     } catch (err) {
-      renderPosts(BLOG, true);   // feed blocked or broken: show the fallback list (or a friendly message)
+      renderPosts(BLOG, true);   // posts.json missing or empty: show the fallback list (or a friendly message)
     }
   }
   loadBlog();
