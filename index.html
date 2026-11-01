@@ -411,14 +411,57 @@
 <script>
 (() => {
   /* ===================== CONFIG: edit these ===================== */
-  const EMAIL = 'you@example.com';
+  const EMAIL = 'shamantmarathe15@gmail.com';
   const RESUME_URL = 'https://example.com/your-resume.pdf';
-  const SOCIALS = [
-    { name: 'GitHub',      icon: '🐙', url: 'https://github.com/i-m-sham',         pin: true, kw: 'git code repos' },
-    { name: 'LinkedIn',    icon: '💼', url: 'https://www.linkedin.com/in/your-name', pin: true, kw: 'work career jobs' },
-    { name: 'Twitter / X', icon: '🐦', url: 'https://x.com/your-handle',                      kw: 'tweets x' },
-    { name: 'Instagram',   icon: '📷', url: 'https://instagram.com/your-handle',               kw: 'photos insta' },
-  ];
+	const SOCIALS = [
+	{ name: 'GitHub',   icon: '🐙', url: 'https://github.com/i-m-sham',           pin: true, kw: 'git code repos' },
+	{ name: 'LinkedIn', icon: '💼', url: 'https://www.linkedin.com/in/shamant-marathe-9b88a4323', pin: true, kw: 'work career jobs' },
+	];
+	const BLOG_URL = 'https://i-m-sham.mataroa.blog/';   // your full blog, opened by the "Visit my blog" button
+	const FEED_URL = 'https://i-m-sham.mataroa.blog/rss/;   // your blog's RSS or Atom feed
+	const MAX_POSTS = 8;
+	/* ---------- Blog window (loads from RSS/Atom, falls back to the BLOG list) ---------- */
+	const safeUrl = u => /^https?:\/\//i.test(u) ? u : '#';
+	const plain = h => (new DOMParser().parseFromString(h || '', 'text/html').body.textContent || '').trim();
+
+	function renderPosts(list) {
+	$('#bloglist').innerHTML = list.length
+		? list.map(p =>
+			'<div class="post"><a href="' + esc(safeUrl(p.url)) + '" target="_blank" rel="noopener">' + esc(p.title) + '</a>' +
+			'<div class="meta">' + esc(p.date) + '</div><p>' + esc(p.summary) + '</p></div>').join('')
+		: '<p>No posts yet. Check back soon!</p>';
+	}
+
+	async function loadBlog() {
+	$('#bloglist').innerHTML = '<p>Loading posts...</p>';
+	try {
+		const res = await fetch(FEED_URL);
+		if (!res.ok) throw new Error('HTTP ' + res.status);
+		const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+		if (xml.querySelector('parsererror')) throw new Error('not valid XML');
+		const txt = (el, sel) => { const n = el.querySelector(sel); return n ? n.textContent.trim() : ''; };
+
+	const posts = [...xml.querySelectorAll('item, entry')].slice(0, MAX_POSTS).map(el => {
+		const atom = el.querySelector('link[rel="alternate"][href]') || el.querySelector('link[href]');
+		const raw = txt(el, 'pubDate') || txt(el, 'published') || txt(el, 'updated');
+		const d = new Date(raw);
+		const text = plain(txt(el, 'description') || txt(el, 'summary') || txt(el, 'content'));
+		return {
+			title: txt(el, 'title') || 'Untitled',
+			url: atom ? atom.getAttribute('href') : txt(el, 'link'),
+			date: isNaN(d) ? raw : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }),
+			summary: text.length > 140 ? text.slice(0, 140) + '…' : text
+		};
+	});
+
+    if (!posts.length) throw new Error('no posts in feed');
+    renderPosts(posts);
+  } catch (err) {
+    renderPosts(BLOG);   // feed blocked or broken: show the hand-written list
+  }
+}
+loadBlog();
+$('#blogvisit').addEventListener('click', () => openUrl(BLOG_URL));
   const NEWS = [   // shown in Start > What's New
     { date: '31 Oct 2026', text: 'Rebuilt the whole site as a computer!' },
     { date: '[date]',      text: '[something you shipped or learned]' },
