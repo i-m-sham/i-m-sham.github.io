@@ -84,6 +84,13 @@
     background:linear-gradient(#fff,#ece9d8 85%,#d6d0c5)}
   .ring a:hover{box-shadow:inset 0 0 0 2px #f9c24e}
 
+  /* blog posts */
+  .post{padding:8px 0;border-bottom:1px solid #e5e2d3}
+  .post:last-child{border-bottom:0}
+  .post a{font-weight:bold;font-size:13px}
+  .post .meta{color:#666;font-size:11px;margin:2px 0 4px}
+  .post p{margin:0}
+
   /* folder window */
   .addr{display:flex;align-items:center;gap:6px;padding:4px 8px;border-bottom:1px solid #c0bcab}
   .addr .field{flex:1;background:#fff;border:1px solid #7f9db9;padding:2px 6px}
@@ -249,7 +256,7 @@
     <div class="status" id="sstatus"></div>
   </section>
 
-  <!-- Webring: replace YOUR-ID (in both links) with the ID you registered with the ring -->
+  <!-- Webring -->
   <section class="frame window" data-app="webring" data-title="WEBRING!" data-tab="Webring" data-icon="🔗" style="left:230px;top:90px;width:420px">
     <h2>Webring</h2>
     <p>Hop to the neighbouring sites in the ring:</p>
@@ -259,6 +266,13 @@
       <a href="https://webring-vit.vercel.app/redirect?from=shamant&amp;dir=next" target="_blank" rel="noopener">next &rarr;</a>
       <a href="https://webring-vit.vercel.app" target="_blank" rel="noopener">ring home</a>
     </p>
+  </section>
+
+  <!-- Blog -->
+  <section class="frame window" data-app="blog" data-title="Blog" data-tab="Blog" data-icon="📝" style="left:250px;top:50px;width:460px">
+    <h2>Blog</h2>
+    <div class="paper" id="bloglist"></div>
+    <p style="text-align:right;margin:10px 0 0"><button class="btn" id="blogvisit">Visit my blog</button></p>
   </section>
 
   <!-- ========== TASKBAR ========== -->
@@ -413,59 +427,19 @@
   /* ===================== CONFIG: edit these ===================== */
   const EMAIL = 'shamantmarathe15@gmail.com';
   const RESUME_URL = 'https://example.com/your-resume.pdf';
-	const SOCIALS = [
-	{ name: 'GitHub',   icon: '🐙', url: 'https://github.com/i-m-sham',           pin: true, kw: 'git code repos' },
-	{ name: 'LinkedIn', icon: '💼', url: 'https://www.linkedin.com/in/shamant-marathe-9b88a4323', pin: true, kw: 'work career jobs' },
-	];
-	const BLOG_URL = 'https://i-m-sham.mataroa.blog/';   // your full blog, opened by the "Visit my blog" button
-	const FEED_URL = 'https://i-m-sham.mataroa.blog/rss/';   // your blog's RSS or Atom feed
-	const MAX_POSTS = 8;
-	/* ---------- Blog window (loads from RSS/Atom, falls back to the BLOG list) ---------- */
-	const safeUrl = u => /^https?:\/\//i.test(u) ? u : '#';
-	const plain = h => (new DOMParser().parseFromString(h || '', 'text/html').body.textContent || '').trim();
-
-	function renderPosts(list) {
-	$('#bloglist').innerHTML = list.length
-		? list.map(p =>
-			'<div class="post"><a href="' + esc(safeUrl(p.url)) + '" target="_blank" rel="noopener">' + esc(p.title) + '</a>' +
-			'<div class="meta">' + esc(p.date) + '</div><p>' + esc(p.summary) + '</p></div>').join('')
-		: '<p>No posts yet. Check back soon!</p>';
-	}
-
-	async function loadBlog() {
-	$('#bloglist').innerHTML = '<p>Loading posts...</p>';
-	try {
-		const res = await fetch(FEED_URL);
-		if (!res.ok) throw new Error('HTTP ' + res.status);
-		const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
-		if (xml.querySelector('parsererror')) throw new Error('not valid XML');
-		const txt = (el, sel) => { const n = el.querySelector(sel); return n ? n.textContent.trim() : ''; };
-
-	const posts = [...xml.querySelectorAll('item, entry')].slice(0, MAX_POSTS).map(el => {
-		const atom = el.querySelector('link[rel="alternate"][href]') || el.querySelector('link[href]');
-		const raw = txt(el, 'pubDate') || txt(el, 'published') || txt(el, 'updated');
-		const d = new Date(raw);
-		const text = plain(txt(el, 'description') || txt(el, 'summary') || txt(el, 'content'));
-		return {
-			title: txt(el, 'title') || 'Untitled',
-			url: atom ? atom.getAttribute('href') : txt(el, 'link'),
-			date: isNaN(d) ? raw : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }),
-			summary: text.length > 140 ? text.slice(0, 140) + '…' : text
-		};
-	});
-
-    if (!posts.length) throw new Error('no posts in feed');
-    renderPosts(posts);
-  } catch (err) {
-    renderPosts(BLOG);   // feed blocked or broken: show the hand-written list
-  }
-}
-loadBlog();
-$('#blogvisit').addEventListener('click', () => openUrl(BLOG_URL));
+  const SOCIALS = [
+    { name: 'GitHub',   icon: '🐙', url: 'https://github.com/i-m-sham',                            pin: true, kw: 'git code repos' },
+    { name: 'LinkedIn', icon: '💼', url: 'https://www.linkedin.com/in/shamant-marathe-9b88a4323', pin: true, kw: 'work career jobs' },
+  ];
+  const BLOG_URL = 'https://i-m-sham.mataroa.blog/';        // opened by the "Visit my blog" button
+  const FEED_URL = 'https://i-m-sham.mataroa.blog/rss/';    // RSS/Atom feed the post list is built from
+  const MAX_POSTS = 8;
+  const BLOG = [];   // optional fallback shown if the feed can't be loaded. Example:
+                     // { date: '1 Nov 2026', title: 'Post title', url: 'https://...', summary: 'One sentence.' }
   const NEWS = [   // shown in Start > What's New
     { date: '31 Oct 2026', text: 'Rebuilt the whole site as a computer!' },
     { date: '[date]',      text: '[something you shipped or learned]' },
-    { date: '1 Nov 2026',      text: 'Webring is live!' },
+    { date: '1 Nov 2026',  text: 'Webring is live!' },
   ];
   /* ============================================================== */
 
@@ -679,6 +653,49 @@ $('#blogvisit').addEventListener('click', () => openUrl(BLOG_URL));
   /* ---------- What's New window ---------- */
   $('#newslist').innerHTML = NEWS.map(n => '<p><b>' + esc(n.date) + '</b> - ' + esc(n.text) + '</p>').join('');
 
+  /* ---------- Blog window (loads from RSS/Atom, falls back to the BLOG list) ---------- */
+  const safeUrl = u => /^https?:\/\//i.test(u) ? u : '#';
+  const plain = h => (new DOMParser().parseFromString(h || '', 'text/html').body.textContent || '').trim();
+
+  function renderPosts(list, failed) {
+    $('#bloglist').innerHTML = list.length
+      ? list.map(p =>
+          '<div class="post"><a href="' + esc(safeUrl(p.url)) + '" target="_blank" rel="noopener">' + esc(p.title) + '</a>' +
+          '<div class="meta">' + esc(p.date) + '</div><p>' + esc(p.summary) + '</p></div>').join('')
+      : '<p>' + (failed ? "Couldn't load the latest posts right now. Use the button below to read the blog." : 'No posts yet. Check back soon!') + '</p>';
+  }
+
+  async function loadBlog() {
+    $('#bloglist').innerHTML = '<p>Loading posts...</p>';
+    try {
+      const res = await fetch(FEED_URL);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const xml = new DOMParser().parseFromString(await res.text(), 'text/xml');
+      if (xml.querySelector('parsererror')) throw new Error('not valid XML');
+      const txt = (el, sel) => { const n = el.querySelector(sel); return n ? n.textContent.trim() : ''; };
+
+      const posts = [...xml.querySelectorAll('item, entry')].slice(0, MAX_POSTS).map(el => {
+        const atom = el.querySelector('link[rel="alternate"][href]') || el.querySelector('link[href]');
+        const raw = txt(el, 'pubDate') || txt(el, 'published') || txt(el, 'updated');
+        const d = new Date(raw);
+        const text = plain(txt(el, 'description') || txt(el, 'summary') || txt(el, 'content'));
+        return {
+          title: txt(el, 'title') || 'Untitled',
+          url: atom ? atom.getAttribute('href') : txt(el, 'link'),
+          date: isNaN(d) ? raw : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }),
+          summary: text.length > 140 ? text.slice(0, 140) + '…' : text
+        };
+      });
+
+      if (!posts.length) throw new Error('no posts in feed');
+      renderPosts(posts);
+    } catch (err) {
+      renderPosts(BLOG, true);   // feed blocked or broken: show the fallback list (or a friendly message)
+    }
+  }
+  loadBlog();
+  $('#blogvisit').addEventListener('click', () => openUrl(BLOG_URL));
+
   /* ---------- folder: Social Media Links ---------- */
   const grid = $('#socgrid');
   SOCIALS.forEach(s => {
@@ -700,11 +717,12 @@ $('#blogvisit').addEventListener('click', () => openUrl(BLOG_URL));
 
   /* ---------- start menu + search ---------- */
   const ITEMS = [
-    { name: 'About Me',           icon: '👤', kw: 'bio profile who',               side: 'left', run: () => openApp('about') },
-    { name: "What's New",         icon: '📰', kw: 'news updates changelog latest', side: 'left', run: () => openApp('news') },
-    { name: 'Email Me',           icon: '✉️', kw: 'contact mail message',          side: 'left', run: () => openApp('email') },
-    { name: 'Resume',             icon: '📄', kw: 'cv pdf hire curriculum',        side: 'left', run: () => openUrl(RESUME_URL) },
-    { name: 'Social Media Links', icon: '📁', kw: 'folder socials accounts',       side: 'left', run: () => openApp('social') },
+    { name: 'About Me',           icon: '👤', kw: 'bio profile who',                 side: 'left', run: () => openApp('about') },
+    { name: "What's New",         icon: '📰', kw: 'news updates changelog latest',   side: 'left', run: () => openApp('news') },
+    { name: 'Blog',               icon: '📝', kw: 'posts writing articles rss',      side: 'left', run: () => openApp('blog') },
+    { name: 'Email Me',           icon: '✉️', kw: 'contact mail message',            side: 'left', run: () => openApp('email') },
+    { name: 'Resume',             icon: '📄', kw: 'cv pdf hire curriculum',          side: 'left', run: () => openUrl(RESUME_URL) },
+    { name: 'Social Media Links', icon: '📁', kw: 'folder socials accounts',         side: 'left', run: () => openApp('social') },
     { name: 'Webring',            icon: '🔗', kw: 'ring links sites random friends', side: 'left', run: () => openApp('webring') },
     ...SOCIALS.map(s => ({ name: s.name, icon: s.icon, kw: 'social ' + (s.kw || ''), side: s.pin ? 'right' : null, run: () => openUrl(s.url) }))
   ];
