@@ -782,24 +782,11 @@
     if (!startMenu.contains(e.target) && !startBtn.contains(e.target)) closeMenu();
   });
 
-  /* ---------- turn off / restart ---------- */
-  const dialog = $('#dialog'), sd = $('#shutdown');
-  $('#off').addEventListener('click', () => { closeMenu(); dialog.classList.add('show'); });
-  $('#d-cancel').addEventListener('click', () => dialog.classList.remove('show'));
-  $('#d-restart').addEventListener('click', () => location.reload());
-  $('#d-off').addEventListener('click', () => {
-    dialog.classList.remove('show');
-    hideNag();
-    sfx.shutdown();
-    sd.className = 'show s1';
-    sd.textContent = 'Saving your settings...';
-    setTimeout(() => {
-      sd.className = 'show s2';
-      sd.innerHTML = "It's now safe to turn off<br>your computer.<br><br><small>(click anywhere to power back on)</small>";
-      try { window.close(); } catch (e) {}   // only works in some browsers; otherwise this screen stays
-    }, 2800);
-  });
-  sd.addEventListener('click', () => { if (sd.classList.contains('s2')) location.reload(); });
+	/* ---------- restart ---------- */
+	const dialog = $('#dialog');
+	$('#off').addEventListener('click', () => { closeMenu(); dialog.classList.add('show'); });
+	$('#d-cancel').addEventListener('click', () => dialog.classList.remove('show'));
+	$('#d-restart').addEventListener('click', () => location.reload());
 
   /* ---------- tray clock ---------- */
   const tick = () => { $('#clock').textContent = new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); };
